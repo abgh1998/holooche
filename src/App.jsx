@@ -353,16 +353,17 @@ function App() {
     setSelectedTransactionId(newTransaction.id);
   };
 
+  const goToDashboard = () => {
+    setActivePage("dashboard");
+  };
+
   const renderPage = () => {
     if (activePage === "dashboard") {
       return (
         <>
           <Balance transactions={transactions} />
-
           <Summary transactions={transactions} />
-
           <Chart transactions={transactions} />
-
           <ManagementReport transactions={transactions} />
         </>
       );
@@ -420,26 +421,16 @@ function App() {
       return (
         <ReportsPage
           transactions={transactions}
-           parties={parties}
-           products={products}
-           salesInvoices={salesInvoices}
-           onBack={() => setActivePage("dashboard")}
-/>
+          parties={parties}
+          products={products}
+          salesInvoices={salesInvoices}
+          onBack={goToDashboard}
+        />
       );
     }
 
     return null;
   };
-  if (activePage === "reports") {
-  return (
-    <ReportsPage
-      transactions={transactions}
-      parties={parties}
-      products={products}
-      salesInvoices={salesInvoices}
-    />
-  );
-}
 
   if (!currentUser) {
     return <Auth onLogin={handleLogin} />;
@@ -448,9 +439,7 @@ function App() {
   return (
     <main className="app">
       <Header currentUser={currentUser} onLogout={handleLogout} />
-
       <MainMenu activePage={activePage} onChangePage={setActivePage} />
-
       {renderPage()}
     </main>
   );
