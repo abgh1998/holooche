@@ -2536,3 +2536,23 @@ header h1 {
     page-break-inside: avoid;
   }
 }
+.reports-back-row {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+.reports-back-button {
+  border: none;
+  border-radius: 14px;
+  padding: 10px 16px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reports-back-button:hover {
+  background: #374151;
+}

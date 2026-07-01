@@ -420,10 +420,11 @@ function App() {
       return (
         <ReportsPage
           transactions={transactions}
-          parties={parties}
-          products={products}
-          salesInvoices={salesInvoices}
-        />
+           parties={parties}
+           products={products}
+           salesInvoices={salesInvoices}
+           onBack={() => setActivePage("dashboard")}
+/>
       );
     }
 

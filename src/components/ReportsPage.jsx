@@ -2,10 +2,11 @@ import { useMemo, useState } from "react";
 import { amountToPersianWords, formatMoney } from "../utils/money";
 
 function ReportsPage({
-  transactions = [],
-  parties = [],
-  products = [],
-  salesInvoices = [],
+  transactions,
+  parties,
+  products,
+  salesInvoices,
+  onBack,
 }) {
   const [period, setPeriod] = useState("month");
 
@@ -694,6 +695,11 @@ function ReportsPage({
 
   return (
     <section className="reports-page">
+        <div className="reports-back-row">
+         <button type="button" className="reports-back-button" onClick={onBack}>
+         ← بازگشت به صفحه اصلی
+       </button>
+        </div>
       <section className="card reports-filter-card">
         <div className="reports-topbar">
           <div>
