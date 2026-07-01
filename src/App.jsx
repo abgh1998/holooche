@@ -432,15 +432,21 @@ function App() {
     return null;
   };
 
-  if (!currentUser) {
+    if (!currentUser) {
     return <Auth onLogin={handleLogin} />;
   }
 
   return (
     <main className="app">
       <Header currentUser={currentUser} onLogout={handleLogout} />
-      <MainMenu activePage={activePage} onChangePage={setActivePage} />
-      {renderPage()}
+
+      <div className="app-shell">
+        <MainMenu activePage={activePage} onChangePage={setActivePage} />
+
+        <section className="app-content">
+          {renderPage()}
+        </section>
+      </div>
     </main>
   );
 }

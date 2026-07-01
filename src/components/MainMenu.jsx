@@ -1,50 +1,62 @@
-function MainMenu({ activePage, onChangePage }) {
-  const menuItems = [
-    {
-      id: "dashboard",
-      title: "داشبورد",
-      icon: "📊",
-    },
-    {
-      id: "cash",
-      title: "دریافت و پرداخت",
-      icon: "💳",
-    },
-    {
-      id: "sales",
-      title: "فاکتور فروش",
-      icon: "🧾",
-    },
-    {
-      id: "products",
-      title: "کالا و خدمات",
-      icon: "📦",
-    },
-    {
-      id: "customers",
-      title: "طرف حساب‌ها",
-      icon: "👥",
-    },
-    {
-      id: "reports",
-      title: "گزارش‌ها",
-      icon: "📈",
-    },
-  ];
+const menuItems = [
+  {
+    id: "dashboard",
+    title: "صفحه اصلی",
+    icon: "🏠",
+  },
+  {
+    id: "cash",
+    title: "صندوق",
+    icon: "💰",
+  },
+  {
+    id: "sales",
+    title: "فاکتور فروش",
+    icon: "🧾",
+  },
+  {
+    id: "products",
+    title: "کالاها و خدمات",
+    icon: "📦",
+  },
+  {
+    id: "customers",
+    title: "مشتریان",
+    icon: "👥",
+  },
+  {
+    id: "reports",
+    title: "گزارش‌ها",
+    icon: "📊",
+  },
+];
 
+function MainMenu({ activePage, onChangePage }) {
   return (
-    <nav className="main-menu">
-      {menuItems.map((item) => (
-        <button
-          key={item.id}
-          className={`menu-btn ${activePage === item.id ? "active" : ""}`}
-          onClick={() => onChangePage(item.id)}
-        >
-          <span className="menu-icon">{item.icon}</span>
-          <span>{item.title}</span>
-        </button>
-      ))}
-    </nav>
+    <aside className="sidebar">
+      <div className="sidebar-title">
+        <span>Holooche</span>
+        <small>سیستم مالی</small>
+      </div>
+
+      <nav className="sidebar-nav">
+        {menuItems.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={
+              activePage === item.id
+                ? "sidebar-link sidebar-link-active"
+                : "sidebar-link"
+            }
+            onClick={() => onChangePage(item.id)}
+          >
+            <span className="sidebar-icon">{item.icon}</span>
+            <span>{item.title}</span>
+          </button>
+        ))}
+      </nav>
+    </aside>
   );
 }
 

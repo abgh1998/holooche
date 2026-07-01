@@ -298,24 +298,9 @@ function ReportsPage({
     URL.revokeObjectURL(url);
   };
 
-  const handleBackClick = () => {
-    if (typeof onBack === "function") {
-      onBack();
-    }
-  };
-
   return (
     <section className="reports-page">
-      <div className="reports-back-row">
-        <button
-          type="button"
-          className="reports-back-button"
-          onClick={handleBackClick}
-        >
-          ← بازگشت به صفحه اصلی
-        </button>
-      </div>
-
+    
       <div className="reports-header">
         <div>
           <p className="section-label">گزارش‌ها</p>
