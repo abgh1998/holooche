@@ -1607,3 +1607,291 @@ label {
     transform: translateY(0) scale(1);
   }
 }
+/* =========================================================
+   Safe Premium Motion Layer
+   Layout-safe modern transitions
+   ========================================================= */
+
+:root {
+  --motion-fast: 0.18s;
+  --motion-medium: 0.28s;
+  --motion-slow: 0.55s;
+}
+
+/* Smooth page load */
+.app {
+  animation: appEntrance 0.55s ease both;
+}
+
+/* Soft entrance for page content */
+.app-content,
+.auth-card,
+.sidebar,
+.main-menu,
+.balance-card,
+.summary-card,
+.chart-card,
+.management-report,
+.transaction-form,
+.transaction-list,
+.invoice-card,
+.customers-page,
+.products-page,
+.sales-invoice-page,
+.reports-page,
+.report-box,
+.report-kpi-card,
+.report-table-card {
+  animation: softReveal 0.55s ease both;
+}
+
+/* Stagger dashboard feel */
+.balance-card {
+  animation-delay: 0.02s;
+}
+
+.summary-card,
+.report-kpi-card {
+  animation-delay: 0.06s;
+}
+
+.chart-card,
+.management-report {
+  animation-delay: 0.1s;
+}
+
+/* Modern card motion without breaking layout */
+.balance-card,
+.summary-card,
+.chart-card,
+.management-report,
+.transaction-form,
+.transaction-list,
+.invoice-card,
+.customers-page,
+.products-page,
+.sales-invoice-page,
+.reports-page,
+.report-box,
+.report-kpi-card,
+.report-table-card,
+.auth-card,
+.sidebar,
+.main-menu {
+  transition:
+    transform var(--motion-medium) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow var(--motion-medium) cubic-bezier(0.22, 1, 0.36, 1),
+    border-color var(--motion-medium) ease,
+    background var(--motion-medium) ease;
+  will-change: transform;
+}
+
+.summary-card:hover,
+.chart-card:hover,
+.management-report:hover,
+.report-box:hover,
+.report-kpi-card:hover,
+.report-table-card:hover,
+.auth-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+}
+
+/* Premium buttons */
+button {
+  transition:
+    transform var(--motion-fast) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    opacity var(--motion-fast) ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Inputs */
+input,
+select,
+textarea {
+  transition:
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    transform var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  transform: translateY(-1px);
+}
+
+/* Sidebar / menu modern movement */
+.sidebar-link,
+.menu-button,
+.main-menu button {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform var(--motion-medium) cubic-bezier(0.22, 1, 0.36, 1),
+    background var(--motion-medium) ease,
+    color var(--motion-medium) ease,
+    box-shadow var(--motion-medium) ease;
+}
+
+.sidebar-link:hover,
+.menu-button:hover,
+.main-menu button:hover {
+  transform: translateX(-4px);
+}
+
+/* Shine effect */
+.sidebar-link::after,
+.menu-button::after,
+.main-menu button::after,
+.auth-submit::after,
+.reports-actions button::after,
+.form-actions button::after,
+.invoice-actions button::after,
+.page-actions button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 100%
+  );
+  transform: translateX(120%);
+  transition: transform 0.75s ease;
+  pointer-events: none;
+}
+
+.sidebar-link:hover::after,
+.menu-button:hover::after,
+.main-menu button:hover::after,
+.auth-submit:hover::after,
+.reports-actions button:hover::after,
+.form-actions button:hover::after,
+.invoice-actions button:hover::after,
+.page-actions button:hover::after {
+  transform: translateX(-120%);
+}
+
+/* Auth page glow, safe only */
+.auth-shell {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-shell::before {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  top: -160px;
+  right: -120px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.2), transparent 65%);
+  filter: blur(10px);
+  animation: floatingGlow 8s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.auth-shell::after {
+  content: "";
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  bottom: -140px;
+  left: -100px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.16), transparent 65%);
+  filter: blur(10px);
+  animation: floatingGlow 9s ease-in-out infinite alternate-reverse;
+  pointer-events: none;
+}
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-logo {
+  animation: logoFloat 3.6s ease-in-out infinite;
+}
+
+/* Table rows */
+table tbody tr {
+  transition:
+    background var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
+}
+
+table tbody tr:hover {
+  background: rgba(248, 250, 252, 0.9);
+}
+
+/* Keyframes */
+@keyframes appEntrance {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes softReveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes floatingGlow {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(-18px, 18px, 0) scale(1.08);
+  }
+}
+
+@keyframes logoFloat {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
