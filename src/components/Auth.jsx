@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 const CURRENT_USER_KEY = "financeCurrentUser";
@@ -33,6 +33,49 @@ function Auth({ onLogin }) {
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(appUser));
     onLogin(appUser);
   };
+    useEffect(() => {
+    let ignore = false;
+
+    const completeEmailValidation = async () => {
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+
+      if (code) {
+        const { error: exchangeError } =
+          await supabase.auth.exchangeCodeForSession(code);
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+
+        if (exchangeError) {
+          setError(
+            "لینک تایید ایمیل معتبر نیست یا منقضی شده است. لطفاً دوباره وارد شوید."
+          );
+          return;
+        }
+      }
+
+      const { data, error: sessionError } = await supabase.auth.getSession();
+
+      if (!ignore && !sessionError && data.session?.user) {
+        saveLoggedInUser(data.session.user);
+      }
+    };
+
+    completeEmailValidation();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!ignore && session?.user) {
+          saveLoggedInUser(session.user);
+        }
+      }
+    );
+
+    return () => {
+      ignore = true;
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const handleLogin = async (event) => {
     event.preventDefault();
