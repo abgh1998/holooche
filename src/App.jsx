@@ -13,6 +13,14 @@ import CustomersPage from "./components/CustomersPage";
 import ProductsPage from "./components/ProductsPage";
 import SalesInvoicePage from "./components/SalesInvoicePage";
 import ReportsPage from "./components/ReportsPage";
+import { supabase } from "./lib/supabaseClient";
+import {
+  fetchParties,
+  insertParty,
+  updatePartyRecord,
+  deletePartyRecord,
+} from "./services/partiesApi";
+
 
 const CURRENT_USER_KEY = "financeCurrentUser";
 
@@ -144,15 +152,7 @@ function App() {
     return null;
   });
 
-  const [parties, setParties] = useState(() => {
-    const savedUser = getSavedCurrentUser();
-
-    if (savedUser) {
-      return getSavedParties(savedUser.email);
-    }
-
-    return [];
-  });
+    const [parties, setParties] = useState([]);
 
   const [products, setProducts] = useState(() => {
     const savedUser = getSavedCurrentUser();
@@ -183,14 +183,27 @@ function App() {
     }
   }, [transactions, currentUser]);
 
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem(
-        getPartiesKey(currentUser.email),
-        JSON.stringify(parties)
-      );
+ useEffect(() => {
+  const loadPartiesFromSupabase = async () => {
+    if (!currentUser?.id) {
+      setParties([]);
+      return;
     }
-  }, [parties, currentUser]);
+
+    const { data, error } = await fetchParties(currentUser.id);
+
+    if (error) {
+      console.error("Fetch parties error:", error);
+      alert("خطا در دریافت طرف حساب‌ها از سرور");
+      return;
+    }
+
+    setParties(data);
+  };
+
+  loadPartiesFromSupabase();
+}, [currentUser]);
+
 
   useEffect(() => {
     if (currentUser) {
@@ -227,22 +240,30 @@ function App() {
     setCurrentUser(user);
     setTransactions(getSavedTransactions(user.email));
     setSelectedTransactionId(getSavedSelectedTransactionId(user.email));
-    setParties(getSavedParties(user.email));
+    setParties([]);
     setProducts(getSavedProducts(user.email));
     setSalesInvoices(getSavedSalesInvoices(user.email));
     setActivePage("dashboard");
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem(CURRENT_USER_KEY);
-    setCurrentUser(null);
-    setTransactions([]);
-    setSelectedTransactionId(null);
-    setParties([]);
-    setProducts([]);
-    setSalesInvoices([]);
-    setActivePage("dashboard");
-  };
+  const handleLogout = async () => {
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    console.error("Logout error:", error);
+  }
+
+  localStorage.removeItem(CURRENT_USER_KEY);
+
+  setCurrentUser(null);
+  setTransactions([]);
+  setSelectedTransactionId(null);
+  setParties([]);
+  setProducts([]);
+  setSalesInvoices([]);
+  setActivePage("dashboard");
+};
+
 
   const selectedTransaction =
     transactions.find(
@@ -286,51 +307,74 @@ function App() {
     }
   };
 
-  const addParty = (party) => {
-    setParties((prevParties) => [party, ...prevParties]);
-  };
+ const addParty = async (party) => {
+  if (!currentUser?.id) {
+    alert("برای ثبت طرف حساب باید وارد حساب کاربری شوید");
+    return;
+  }
 
-  const deleteParty = (id) => {
-    const confirmDelete = window.confirm(
-      "آیا مطمئن هستید که میخواهید این طرف حساب حذف شود؟"
-    );
+  const { data, error } = await insertParty(currentUser.id, party);
 
-    if (confirmDelete) {
-      setParties((prevParties) =>
-        prevParties.filter((party) => party.id !== id)
-      );
-    }
-  };
+  if (error) {
+    console.error("Insert party error:", error);
+    alert("خطا در ثبت طرف حساب");
+    return;
+  }
 
-  const addProduct = (product) => {
-    setProducts((prevProducts) => [product, ...prevProducts]);
-  };
+  setParties((prevParties) => [data, ...prevParties]);
+};
 
-  const deleteProduct = (id) => {
-    const confirmDelete = window.confirm(
-      "آیا مطمئن هستید که میخواهید این کالا یا خدمت حذف شود؟"
-    );
+const deleteParty = async (id) => {
+  const confirmDelete = window.confirm(
+    "آیا مطمئن هستید که میخواهید این طرف حساب حذف شود؟"
+  );
 
-    if (confirmDelete) {
-      setProducts((prevProducts) =>
-        prevProducts.filter((product) => product.id !== id)
-      );
-    }
-  };
-  const updateProduct = (updatedProduct) => {
-  setProducts((prevProducts) =>
-    prevProducts.map((product) =>
-      product.id === updatedProduct.id ? updatedProduct : product
-    )
+  if (!confirmDelete) {
+    return;
+  }
+
+  if (!currentUser?.id) {
+    alert("برای حذف طرف حساب باید وارد حساب کاربری شوید");
+    return;
+  }
+
+  const { error } = await deletePartyRecord(currentUser.id, id);
+
+  if (error) {
+    console.error("Delete party error:", error);
+    alert("خطا در حذف طرف حساب");
+    return;
+  }
+
+  setParties((prevParties) =>
+    prevParties.filter((party) => party.id !== id)
   );
 };
-  const updateParty = (updatedParty) => {
+
+const updateParty = async (updatedParty) => {
+  if (!currentUser?.id) {
+    alert("برای ویرایش طرف حساب باید وارد حساب کاربری شوید");
+    return;
+  }
+
+  const { data, error } = await updatePartyRecord(
+    currentUser.id,
+    updatedParty
+  );
+
+  if (error) {
+    console.error("Update party error:", error);
+    alert("خطا در ویرایش طرف حساب");
+    return;
+  }
+
   setParties((prevParties) =>
     prevParties.map((party) =>
-      party.id === updatedParty.id ? updatedParty : party
+      party.id === data.id ? data : party
     )
   );
 };
+  
 
   const createSalesInvoice = (invoice) => {
     setSalesInvoices((prevInvoices) => [invoice, ...prevInvoices]);
