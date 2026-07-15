@@ -1005,3 +1005,95 @@ tbody tr:hover {
     min-height: 44px;
   }
 }
+.user-box {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 10px 8px 8px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08) !important;
+  backdrop-filter: blur(16px) !important;
+  direction: rtl !important;
+}
+
+.user-box span {
+  color: #334155 !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  padding: 0 4px !important;
+  white-space: nowrap !important;
+}
+
+.logout-btn {
+  width: auto !important;
+  min-height: auto !important;
+  border: none !important;
+  border-radius: 999px !important;
+  padding: 8px 14px !important;
+  background: linear-gradient(135deg, #111827, #1f2937) !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.18) !important;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease !important;
+}
+
+.logout-btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 16px 36px rgba(17, 24, 39, 0.26) !important;
+}
+
+.logout-btn:active {
+  transform: translateY(1px) scale(0.98) !important;
+}
+
+@media (max-width: 560px) {
+  .user-box {
+    width: 100% !important;
+    justify-content: space-between !important;
+    border-radius: 20px !important;
+  }
+
+  .user-box span {
+    font-size: 12px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+.header,
+.app-header,
+.app > header {
+  width: 100% !important;
+  direction: rtl !important;
+  text-align: right !important;
+  align-items: flex-start !important;
+}
+
+.header h1,
+.app-header h1,
+.app > header h1 {
+  width: 100% !important;
+  text-align: right !important;
+  direction: rtl !important;
+}
+
+.header p,
+.app-header p,
+.app > header p {
+  width: 100% !important;
+  text-align: right !important;
+  direction: rtl !important;
+}
+
+.user-box {
+  align-self: flex-start !important;
+  margin-right: 0 !important;
+  margin-left: auto !important;
+  direction: rtl !important;
+  text-align: right !important;
+}
