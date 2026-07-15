@@ -317,6 +317,13 @@ function App() {
       );
     }
   };
+  const updateProduct = (updatedProduct) => {
+  setProducts((prevProducts) =>
+    prevProducts.map((product) =>
+      product.id === updatedProduct.id ? updatedProduct : product
+    )
+  );
+};
   const updateParty = (updatedParty) => {
   setParties((prevParties) =>
     prevParties.map((party) =>
@@ -407,9 +414,10 @@ function App() {
     if (activePage === "products") {
       return (
         <ProductsPage
-          products={products}
-          onAddProduct={addProduct}
-          onDeleteProduct={deleteProduct}
+         products={products}
+         onAddProduct={addProduct}
+         onDeleteProduct={deleteProduct}
+         onUpdateProduct={updateProduct}
         />
       );
     }

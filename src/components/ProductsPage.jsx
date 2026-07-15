@@ -5,7 +5,12 @@ import {
   persianToEnglishNumber,
 } from "../utils/money";
 
-function ProductsPage({ products = [], onAddProduct, onDeleteProduct }) {
+function ProductsPage({
+  products = [],
+  onAddProduct,
+  onDeleteProduct,
+  onUpdateProduct,
+}) {
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [type, setType] = useState("product");
@@ -17,13 +22,26 @@ function ProductsPage({ products = [], onAddProduct, onDeleteProduct }) {
   const [minStock, setMinStock] = useState("");
   const [searchText, setSearchText] = useState("");
 
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    code: "",
+    name: "",
+    type: "product",
+    unit: "عدد",
+    category: "",
+    buyPrice: "",
+    salePrice: "",
+    stock: "",
+    minStock: "",
+  });
+
   const productTypeLabels = {
     product: "کالا",
     service: "خدمت",
   };
 
   const formatNumberInput = (value) => {
-    const englishValue = persianToEnglishNumber(value);
+    const englishValue = persianToEnglishNumber(String(value));
     const onlyNumbers = englishValue.replace(/[^0-9]/g, "");
 
     if (onlyNumbers === "") {
@@ -34,7 +52,7 @@ function ProductsPage({ products = [], onAddProduct, onDeleteProduct }) {
   };
 
   const getPureNumber = (value) => {
-    const englishValue = persianToEnglishNumber(value);
+    const englishValue = persianToEnglishNumber(String(value));
     const onlyNumbers = englishValue.replace(/[^0-9]/g, "");
 
     if (onlyNumbers === "") {
@@ -42,6 +60,18 @@ function ProductsPage({ products = [], onAddProduct, onDeleteProduct }) {
     }
 
     return Number(onlyNumbers);
+  };
+
+  const resetAddForm = () => {
+    setCode("");
+    setName("");
+    setType("product");
+    setUnit("عدد");
+    setCategory("");
+    setBuyPrice("");
+    setSalePrice("");
+    setStock("");
+    setMinStock("");
   };
 
   const handleSubmit = (e) => {
@@ -78,16 +108,88 @@ function ProductsPage({ products = [], onAddProduct, onDeleteProduct }) {
     };
 
     onAddProduct(newProduct);
+    resetAddForm();
+  };
 
-    setCode("");
-    setName("");
-    setType("product");
-    setUnit("عدد");
-    setCategory("");
-    setBuyPrice("");
-    setSalePrice("");
-    setStock("");
-    setMinStock("");
+  const startEditProduct = (product) => {
+    setEditingProductId(product.id);
+
+    setEditForm({
+      code: product.code || "",
+      name: product.name || "",
+      type: product.type || "product",
+      unit: product.unit || "عدد",
+      category: product.category || "",
+      buyPrice:
+        Number(product.buyPrice) > 0
+          ? Number(product.buyPrice).toLocaleString("fa-IR")
+          : "",
+      salePrice:
+        Number(product.salePrice) > 0
+          ? Number(product.salePrice).toLocaleString("fa-IR")
+          : "",
+      stock:
+        Number(product.stock) > 0
+          ? Number(product.stock).toLocaleString("fa-IR")
+          : "",
+      minStock:
+        Number(product.minStock) > 0
+          ? Number(product.minStock).toLocaleString("fa-IR")
+          : "",
+    });
+  };
+
+  const cancelEditProduct = () => {
+    setEditingProductId(null);
+
+    setEditForm({
+      code: "",
+      name: "",
+      type: "product",
+      unit: "عدد",
+      category: "",
+      buyPrice: "",
+      salePrice: "",
+      stock: "",
+      minStock: "",
+    });
+  };
+
+  const handleEditSubmit = (e, product) => {
+    e.preventDefault();
+
+    const cleanName = editForm.name.trim();
+    const pureBuyPrice = getPureNumber(editForm.buyPrice);
+    const pureSalePrice = getPureNumber(editForm.salePrice);
+    const pureStock = getPureNumber(editForm.stock);
+    const pureMinStock = getPureNumber(editForm.minStock);
+
+    if (cleanName === "") {
+      alert("نام کالا یا خدمت را وارد کنید");
+      return;
+    }
+
+    if (pureSalePrice <= 0) {
+      alert("قیمت فروش باید بیشتر از صفر باشد");
+      return;
+    }
+
+    const updatedProduct = {
+      ...product,
+      code: editForm.code.trim() || product.code,
+      name: cleanName,
+      type: editForm.type,
+      unit: editForm.unit.trim() || "عدد",
+      category: editForm.category.trim(),
+      buyPrice: pureBuyPrice,
+      salePrice: pureSalePrice,
+      stock: editForm.type === "service" ? 0 : pureStock,
+      minStock: editForm.type === "service" ? 0 : pureMinStock,
+      updatedAt: new Date().toISOString(),
+    };
+
+    onUpdateProduct(updatedProduct);
+    cancelEditProduct();
   };
 
   const filteredProducts = products.filter((product) => {
@@ -97,11 +199,16 @@ function ProductsPage({ products = [], onAddProduct, onDeleteProduct }) {
       return true;
     }
 
+    const productName = product.name || "";
+    const productCode = product.code || "";
+    const productCategory = product.category || "";
+    const productType = productTypeLabels[product.type] || "";
+
     return (
-      product.name.toLowerCase().includes(search) ||
-      product.code.toLowerCase().includes(search) ||
-      product.category.toLowerCase().includes(search) ||
-      productTypeLabels[product.type].includes(searchText)
+      productName.toLowerCase().includes(search) ||
+      productCode.toLowerCase().includes(search) ||
+      productCategory.toLowerCase().includes(search) ||
+      productType.includes(searchText)
     );
   });
 
@@ -115,7 +222,7 @@ function ProductsPage({ products = [], onAddProduct, onDeleteProduct }) {
 
   const totalStockValue = products.reduce((total, product) => {
     if (product.type === "product") {
-      return total + Number(product.stock) * Number(product.buyPrice);
+      return total + Number(product.stock || 0) * Number(product.buyPrice || 0);
     }
 
     return total;
@@ -285,7 +392,9 @@ function ProductsPage({ products = [], onAddProduct, onDeleteProduct }) {
         ) : (
           <div className="products-list">
             {filteredProducts.map((product) => {
-              const profit = Number(product.salePrice) - Number(product.buyPrice);
+              const profit =
+                Number(product.salePrice || 0) - Number(product.buyPrice || 0);
+
               const isLowStock =
                 product.type === "product" &&
                 Number(product.minStock) > 0 &&
@@ -347,7 +456,7 @@ function ProductsPage({ products = [], onAddProduct, onDeleteProduct }) {
                         <p>
                           <span>موجودی:</span>
                           <strong>
-                            {Number(product.stock).toLocaleString("fa-IR")}{" "}
+                            {Number(product.stock || 0).toLocaleString("fa-IR")}{" "}
                             {product.unit}
                           </strong>
                         </p>
@@ -355,7 +464,7 @@ function ProductsPage({ products = [], onAddProduct, onDeleteProduct }) {
                         <p>
                           <span>حداقل موجودی:</span>
                           <strong>
-                            {Number(product.minStock).toLocaleString("fa-IR")}{" "}
+                            {Number(product.minStock || 0).toLocaleString("fa-IR")}{" "}
                             {product.unit}
                           </strong>
                         </p>
@@ -373,12 +482,178 @@ function ProductsPage({ products = [], onAddProduct, onDeleteProduct }) {
                     )}
                   </div>
 
-                  <button
-                    className="product-delete-btn"
-                    onClick={() => onDeleteProduct(product.id)}
-                  >
-                    حذف
-                  </button>
+                  {editingProductId === product.id && (
+                    <form
+                      className="product-edit-form"
+                      onSubmit={(e) => handleEditSubmit(e, product)}
+                    >
+                      <label>
+                        کد کالا / خدمت
+                        <input
+                          type="text"
+                          value={editForm.code}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              code: e.target.value,
+                            })
+                          }
+                        />
+                      </label>
+
+                      <label>
+                        نام کالا / خدمت
+                        <input
+                          type="text"
+                          value={editForm.name}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              name: e.target.value,
+                            })
+                          }
+                        />
+                      </label>
+
+                      <label>
+                        نوع
+                        <select
+                          value={editForm.type}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              type: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="product">کالا</option>
+                          <option value="service">خدمت</option>
+                        </select>
+                      </label>
+
+                      <label>
+                        واحد
+                        <input
+                          type="text"
+                          value={editForm.unit}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              unit: e.target.value,
+                            })
+                          }
+                        />
+                      </label>
+
+                      <label>
+                        دسته‌بندی
+                        <input
+                          type="text"
+                          value={editForm.category}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              category: e.target.value,
+                            })
+                          }
+                        />
+                      </label>
+
+                      <label>
+                        قیمت خرید
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={editForm.buyPrice}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              buyPrice: formatNumberInput(e.target.value),
+                            })
+                          }
+                        />
+                      </label>
+
+                      <label>
+                        قیمت فروش
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={editForm.salePrice}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              salePrice: formatNumberInput(e.target.value),
+                            })
+                          }
+                        />
+                      </label>
+
+                      <label>
+                        موجودی
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          disabled={editForm.type === "service"}
+                          value={editForm.stock}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              stock: formatNumberInput(e.target.value),
+                            })
+                          }
+                        />
+                      </label>
+
+                      <label>
+                        حداقل موجودی هشدار
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          disabled={editForm.type === "service"}
+                          value={editForm.minStock}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              minStock: formatNumberInput(e.target.value),
+                            })
+                          }
+                        />
+                      </label>
+
+                      <div className="product-edit-actions">
+                        <button type="submit" className="product-save-btn">
+                          ذخیره تغییرات
+                        </button>
+
+                        <button
+                          type="button"
+                          className="product-cancel-btn"
+                          onClick={cancelEditProduct}
+                        >
+                          انصراف
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  <div className="product-actions">
+                    <button
+                      type="button"
+                      className="product-edit-btn"
+                      onClick={() => startEditProduct(product)}
+                    >
+                      ویرایش
+                    </button>
+
+                    <button
+                      type="button"
+                      className="product-delete-btn"
+                      onClick={() => onDeleteProduct(product.id)}
+                    >
+                      حذف
+                    </button>
+                  </div>
                 </div>
               );
             })}
