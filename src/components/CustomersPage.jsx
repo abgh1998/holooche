@@ -5,7 +5,12 @@ import {
   persianToEnglishNumber,
 } from "../utils/money";
 
-function CustomersPage({ parties = [], onAddParty, onDeleteParty }) {
+function CustomersPage({
+  parties = [],
+  onAddParty,
+  onDeleteParty,
+  onUpdateParty,
+}) {
   const [name, setName] = useState("");
   const [type, setType] = useState("customer");
   const [phone, setPhone] = useState("");
@@ -13,6 +18,16 @@ function CustomersPage({ parties = [], onAddParty, onDeleteParty }) {
   const [openingBalance, setOpeningBalance] = useState("");
   const [balanceStatus, setBalanceStatus] = useState("none");
   const [searchText, setSearchText] = useState("");
+
+  const [editingPartyId, setEditingPartyId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    type: "customer",
+    phone: "",
+    address: "",
+    openingBalance: "",
+    balanceStatus: "none",
+  });
 
   const partyTypeLabels = {
     customer: "مشتری",
@@ -38,7 +53,7 @@ function CustomersPage({ parties = [], onAddParty, onDeleteParty }) {
   };
 
   const getPureAmount = (value) => {
-    const englishValue = persianToEnglishNumber(value);
+    const englishValue = persianToEnglishNumber(String(value));
     const onlyNumbers = englishValue.replace(/[^0-9]/g, "");
 
     if (onlyNumbers === "") {
@@ -46,6 +61,15 @@ function CustomersPage({ parties = [], onAddParty, onDeleteParty }) {
     }
 
     return Number(onlyNumbers);
+  };
+
+  const resetAddForm = () => {
+    setName("");
+    setType("customer");
+    setPhone("");
+    setAddress("");
+    setOpeningBalance("");
+    setBalanceStatus("none");
   };
 
   const handleSubmit = (e) => {
@@ -76,13 +100,67 @@ function CustomersPage({ parties = [], onAddParty, onDeleteParty }) {
     };
 
     onAddParty(newParty);
+    resetAddForm();
+  };
 
-    setName("");
-    setType("customer");
-    setPhone("");
-    setAddress("");
-    setOpeningBalance("");
-    setBalanceStatus("none");
+  const startEditParty = (party) => {
+    setEditingPartyId(party.id);
+
+    setEditForm({
+      name: party.name || "",
+      type: party.type || "customer",
+      phone: party.phone || "",
+      address: party.address || "",
+      openingBalance:
+        Number(party.openingBalance) > 0
+          ? Number(party.openingBalance).toLocaleString("fa-IR")
+          : "",
+      balanceStatus: party.balanceStatus || "none",
+    });
+  };
+
+  const cancelEditParty = () => {
+    setEditingPartyId(null);
+
+    setEditForm({
+      name: "",
+      type: "customer",
+      phone: "",
+      address: "",
+      openingBalance: "",
+      balanceStatus: "none",
+    });
+  };
+
+  const handleEditSubmit = (e, party) => {
+    e.preventDefault();
+
+    const cleanName = editForm.name.trim();
+    const pureBalance = getPureAmount(editForm.openingBalance);
+
+    if (cleanName === "") {
+      alert("نام طرف حساب را وارد کنید");
+      return;
+    }
+
+    if (pureBalance > 0 && editForm.balanceStatus === "none") {
+      alert("برای مانده اول دوره باید وضعیت بدهکار یا بستانکار را انتخاب کنید");
+      return;
+    }
+
+    const updatedParty = {
+      ...party,
+      name: cleanName,
+      type: editForm.type,
+      phone: editForm.phone.trim(),
+      address: editForm.address.trim(),
+      openingBalance: pureBalance,
+      balanceStatus: pureBalance === 0 ? "none" : editForm.balanceStatus,
+      updatedAt: new Date().toISOString(),
+    };
+
+    onUpdateParty(updatedParty);
+    cancelEditParty();
   };
 
   const filteredParties = parties.filter((party) => {
@@ -92,16 +170,20 @@ function CustomersPage({ parties = [], onAddParty, onDeleteParty }) {
       return true;
     }
 
+    const partyName = party.name || "";
+    const partyPhone = party.phone || "";
+    const partyType = partyTypeLabels[party.type] || "";
+
     return (
-      party.name.toLowerCase().includes(search) ||
-      party.phone.toLowerCase().includes(search) ||
-      partyTypeLabels[party.type].includes(searchText)
+      partyName.toLowerCase().includes(search) ||
+      partyPhone.toLowerCase().includes(search) ||
+      partyType.includes(searchText)
     );
   });
 
   const totalDebtor = parties.reduce((total, party) => {
     if (party.balanceStatus === "debtor") {
-      return total + Number(party.openingBalance);
+      return total + Number(party.openingBalance || 0);
     }
 
     return total;
@@ -109,7 +191,7 @@ function CustomersPage({ parties = [], onAddParty, onDeleteParty }) {
 
   const totalCreditor = parties.reduce((total, party) => {
     if (party.balanceStatus === "creditor") {
-      return total + Number(party.openingBalance);
+      return total + Number(party.openingBalance || 0);
     }
 
     return total;
@@ -234,13 +316,11 @@ function CustomersPage({ parties = [], onAddParty, onDeleteParty }) {
                 <div className="party-main">
                   <div>
                     <h3>{party.name}</h3>
-                    <p>{partyTypeLabels[party.type]}</p>
+                    <p>{partyTypeLabels[party.type] || "نامشخص"}</p>
                   </div>
 
-                  <span
-                    className={`party-badge ${party.balanceStatus}`}
-                  >
-                    {balanceStatusLabels[party.balanceStatus]}
+                  <span className={`party-badge ${party.balanceStatus}`}>
+                    {balanceStatusLabels[party.balanceStatus] || "نامشخص"}
                   </span>
                 </div>
 
@@ -271,12 +351,126 @@ function CustomersPage({ parties = [], onAddParty, onDeleteParty }) {
                   )}
                 </div>
 
-                <button
-                  className="party-delete-btn"
-                  onClick={() => onDeleteParty(party.id)}
-                >
-                  حذف
-                </button>
+                {editingPartyId === party.id && (
+                  <form
+                    className="party-edit-form"
+                    onSubmit={(e) => handleEditSubmit(e, party)}
+                  >
+                    <label>
+                      نام طرف حساب
+                      <input
+                        type="text"
+                        value={editForm.name}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, name: e.target.value })
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      نوع طرف حساب
+                      <select
+                        value={editForm.type}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, type: e.target.value })
+                        }
+                      >
+                        <option value="customer">مشتری</option>
+                        <option value="supplier">تامین‌کننده</option>
+                        <option value="person">شخص</option>
+                      </select>
+                    </label>
+
+                    <label>
+                      شماره تماس
+                      <input
+                        type="text"
+                        value={editForm.phone}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, phone: e.target.value })
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      مانده اول دوره
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={editForm.openingBalance}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            openingBalance: formatAmountInput(e.target.value),
+                          })
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      وضعیت مانده
+                      <select
+                        value={editForm.balanceStatus}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            balanceStatus: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="none">بدون مانده</option>
+                        <option value="debtor">بدهکار</option>
+                        <option value="creditor">بستانکار</option>
+                      </select>
+                    </label>
+
+                    <label className="party-edit-address">
+                      آدرس
+                      <input
+                        type="text"
+                        value={editForm.address}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            address: e.target.value,
+                          })
+                        }
+                      />
+                    </label>
+
+                    <div className="party-edit-actions">
+                      <button type="submit" className="party-save-btn">
+                        ذخیره تغییرات
+                      </button>
+
+                      <button
+                        type="button"
+                        className="party-cancel-btn"
+                        onClick={cancelEditParty}
+                      >
+                        انصراف
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="party-actions">
+                  <button
+                    type="button"
+                    className="party-edit-btn"
+                    onClick={() => startEditParty(party)}
+                  >
+                    ویرایش
+                  </button>
+
+                  <button
+                    type="button"
+                    className="party-delete-btn"
+                    onClick={() => onDeleteParty(party.id)}
+                  >
+                    حذف
+                  </button>
+                </div>
               </div>
             ))}
           </div>

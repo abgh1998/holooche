@@ -317,6 +317,13 @@ function App() {
       );
     }
   };
+  const updateParty = (updatedParty) => {
+  setParties((prevParties) =>
+    prevParties.map((party) =>
+      party.id === updatedParty.id ? updatedParty : party
+    )
+  );
+};
 
   const createSalesInvoice = (invoice) => {
     setSalesInvoices((prevInvoices) => [invoice, ...prevInvoices]);
@@ -410,10 +417,11 @@ function App() {
     if (activePage === "customers") {
       return (
         <CustomersPage
-          parties={parties}
-          onAddParty={addParty}
-          onDeleteParty={deleteParty}
-        />
+         parties={parties}
+         onAddParty={addParty}
+         onDeleteParty={deleteParty}
+         onUpdateParty={updateParty}
+       />
       );
     }
 

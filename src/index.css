@@ -1321,3 +1321,104 @@ tbody tr:hover {
     align-items: flex-start !important;
   }
 }
+.party-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+
+.party-edit-btn {
+  width: auto !important;
+  min-height: 40px !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 9px 16px !important;
+  background: rgba(37, 99, 235, 0.1) !important;
+  color: #1d4ed8 !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+}
+
+.party-edit-btn:hover {
+  transform: translateY(-1px) !important;
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 32px rgba(37, 99, 235, 0.22) !important;
+}
+
+.party-edit-form {
+  margin-top: 16px !important;
+  padding: 16px !important;
+  border-radius: 20px !important;
+  background: #f8fafc !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.party-edit-form label {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  color: #334155 !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+
+.party-edit-address,
+.party-edit-actions {
+  grid-column: 1 / -1 !important;
+}
+
+.party-edit-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 4px !important;
+}
+
+.party-save-btn {
+  width: auto !important;
+  min-height: 40px !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 9px 16px !important;
+  background: #111827 !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+}
+
+.party-cancel-btn {
+  width: auto !important;
+  min-height: 40px !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 9px 16px !important;
+  background: #e2e8f0 !important;
+  color: #334155 !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+}
+
+@media (max-width: 700px) {
+  .party-edit-form {
+    grid-template-columns: 1fr !important;
+  }
+
+  .party-actions,
+  .party-edit-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .party-edit-btn,
+  .party-delete-btn,
+  .party-save-btn,
+  .party-cancel-btn {
+    width: 100% !important;
+  }
+}
