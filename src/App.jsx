@@ -27,6 +27,10 @@ import {
   deleteProductRecord,
 } from "./services/productsApi";
 
+import {
+  fetchSalesInvoices,
+  insertSalesInvoice,
+} from "./services/salesInvoicesApi";
 
 const CURRENT_USER_KEY = "financeCurrentUser";
 
@@ -162,15 +166,7 @@ function App() {
 
     const [products, setProducts] = useState([]);
 
-  const [salesInvoices, setSalesInvoices] = useState(() => {
-    const savedUser = getSavedCurrentUser();
-
-    if (savedUser) {
-      return getSavedSalesInvoices(savedUser.email);
-    }
-
-    return [];
-  });
+  const [salesInvoices, setSalesInvoices] = useState([]);
 
   useEffect(() => {
   const loadProductsFromSupabase = async () => {
@@ -215,14 +211,7 @@ function App() {
 }, [currentUser]);
 
 
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem(
-        getProductsKey(currentUser.email),
-        JSON.stringify(products)
-      );
-    }
-  }, [products, currentUser]);
+ 
 
   useEffect(() => {
     if (currentUser) {
@@ -252,7 +241,7 @@ function App() {
     setSelectedTransactionId(getSavedSelectedTransactionId(user.email));
     setParties([]);
     setProducts([]);
-    setSalesInvoices(getSavedSalesInvoices(user.email));
+    setSalesInvoices([]);
     setActivePage("dashboard");
   };
 
@@ -439,7 +428,6 @@ const updateProduct = async (updatedProduct) => {
     currentUser.id,
     updatedProduct
   );
-
   if (error) {
     console.error("Update product error:", error);
     alert("خطا در ویرایش کالا یا خدمت");
@@ -453,45 +441,57 @@ const updateProduct = async (updatedProduct) => {
   );
 };
 
-  const createSalesInvoice = (invoice) => {
-    setSalesInvoices((prevInvoices) => [invoice, ...prevInvoices]);
+ const createSalesInvoice = async (invoice) => {
+  if (!currentUser?.id) {
+    alert("برای ثبت فاکتور باید وارد حساب کاربری شوید");
+    return;
+  }
 
-    setProducts((prevProducts) =>
-      prevProducts.map((product) => {
-        const invoiceRow = invoice.rows.find(
-          (row) => String(row.productId) === String(product.id)
-        );
+  const { data, error } = await insertSalesInvoice(currentUser.id, invoice);
 
-        if (!invoiceRow || product.type === "service") {
-          return product;
-        }
+  if (error) {
+    console.error("Insert sales invoice error:", error);
+    alert("خطا در ثبت فاکتور فروش");
+    return;
+  }
 
-        return {
-          ...product,
-          stock: Math.max(
-            Number(product.stock) - Number(invoiceRow.quantity),
-            0
-          ),
-        };
-      })
-    );
+  setSalesInvoices((prevInvoices) => [data, ...prevInvoices]);
 
-    const newTransaction = {
-      id: Date.now() + 1,
-      title: `فروش - ${invoice.invoiceNumber}`,
-      amount: Number(invoice.finalTotal),
-      type: "income",
-      date: invoice.createdAt,
-    };
+  setProducts((prevProducts) =>
+    prevProducts.map((product) => {
+      const invoiceRow = invoice.rows.find(
+        (row) => String(row.productId) === String(product.id)
+      );
 
-    setTransactions((prevTransactions) => [newTransaction, ...prevTransactions]);
-    setSelectedTransactionId(newTransaction.id);
+      if (!invoiceRow || product.type === "service") {
+        return product;
+      }
+
+      return {
+        ...product,
+        stock: Math.max(
+          Number(product.stock) - Number(invoiceRow.quantity),
+          0
+        ),
+      };
+    })
+  );
+
+  const newTransaction = {
+    id: Date.now() + 1,
+    title: `فروش - ${data.invoiceNumber}`,
+    amount: Number(data.finalTotal),
+    type: "income",
+    date: data.createdAt,
   };
 
-  const goToDashboard = () => {
-    setActivePage("dashboard");
-  };
+  setTransactions((prevTransactions) => [newTransaction, ...prevTransactions]);
+  setSelectedTransactionId(newTransaction.id);
+};
 
+const goToDashboard = () => {
+  setActivePage("dashboard");
+};
   const renderPage = () => {
     if (activePage === "dashboard") {
       return (
@@ -573,7 +573,7 @@ const updateProduct = async (updatedProduct) => {
     return <Auth onLogin={handleLogin} />;
   }
 
-  return (
+    return (
     <main className="app">
       <Header currentUser={currentUser} onLogout={handleLogout} />
 
