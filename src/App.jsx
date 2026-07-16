@@ -20,6 +20,12 @@ import {
   updatePartyRecord,
   deletePartyRecord,
 } from "./services/partiesApi";
+import {
+  fetchProducts,
+  insertProduct,
+  updateProductRecord,
+  deleteProductRecord,
+} from "./services/productsApi";
 
 
 const CURRENT_USER_KEY = "financeCurrentUser";
@@ -154,15 +160,7 @@ function App() {
 
     const [parties, setParties] = useState([]);
 
-  const [products, setProducts] = useState(() => {
-    const savedUser = getSavedCurrentUser();
-
-    if (savedUser) {
-      return getSavedProducts(savedUser.email);
-    }
-
-    return [];
-  });
+    const [products, setProducts] = useState([]);
 
   const [salesInvoices, setSalesInvoices] = useState(() => {
     const savedUser = getSavedCurrentUser();
@@ -175,13 +173,25 @@ function App() {
   });
 
   useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem(
-        getTransactionsKey(currentUser.email),
-        JSON.stringify(transactions)
-      );
+  const loadProductsFromSupabase = async () => {
+    if (!currentUser?.id) {
+      setProducts([]);
+      return;
     }
-  }, [transactions, currentUser]);
+
+    const { data, error } = await fetchProducts(currentUser.id);
+
+    if (error) {
+      console.error("Fetch products error:", error);
+      alert("خطا در دریافت کالاها و خدمات از سرور");
+      return;
+    }
+
+    setProducts(data);
+  };
+
+  loadProductsFromSupabase();
+}, [currentUser]);
 
  useEffect(() => {
   const loadPartiesFromSupabase = async () => {
@@ -241,7 +251,7 @@ function App() {
     setTransactions(getSavedTransactions(user.email));
     setSelectedTransactionId(getSavedSelectedTransactionId(user.email));
     setParties([]);
-    setProducts(getSavedProducts(user.email));
+    setProducts([]);
     setSalesInvoices(getSavedSalesInvoices(user.email));
     setActivePage("dashboard");
   };
@@ -375,6 +385,73 @@ const updateParty = async (updatedParty) => {
   );
 };
   
+const addProduct = async (product) => {
+  if (!currentUser?.id) {
+    alert("برای ثبت کالا یا خدمت باید وارد حساب کاربری شوید");
+    return;
+  }
+
+  const { data, error } = await insertProduct(currentUser.id, product);
+
+  if (error) {
+    console.error("Insert product error:", error);
+    alert("خطا در ثبت کالا یا خدمت");
+    return;
+  }
+
+  setProducts((prevProducts) => [data, ...prevProducts]);
+};
+
+const deleteProduct = async (id) => {
+  const confirmDelete = window.confirm(
+    "آیا مطمئن هستید که میخواهید این کالا یا خدمت حذف شود؟"
+  );
+
+  if (!confirmDelete) {
+    return;
+  }
+
+  if (!currentUser?.id) {
+    alert("برای حذف کالا یا خدمت باید وارد حساب کاربری شوید");
+    return;
+  }
+
+  const { error } = await deleteProductRecord(currentUser.id, id);
+
+  if (error) {
+    console.error("Delete product error:", error);
+    alert("خطا در حذف کالا یا خدمت");
+    return;
+  }
+
+  setProducts((prevProducts) =>
+    prevProducts.filter((product) => product.id !== id)
+  );
+};
+
+const updateProduct = async (updatedProduct) => {
+  if (!currentUser?.id) {
+    alert("برای ویرایش کالا یا خدمت باید وارد حساب کاربری شوید");
+    return;
+  }
+
+  const { data, error } = await updateProductRecord(
+    currentUser.id,
+    updatedProduct
+  );
+
+  if (error) {
+    console.error("Update product error:", error);
+    alert("خطا در ویرایش کالا یا خدمت");
+    return;
+  }
+
+  setProducts((prevProducts) =>
+    prevProducts.map((product) =>
+      product.id === data.id ? data : product
+    )
+  );
+};
 
   const createSalesInvoice = (invoice) => {
     setSalesInvoices((prevInvoices) => [invoice, ...prevInvoices]);
