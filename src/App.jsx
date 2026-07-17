@@ -146,18 +146,13 @@ const getSavedSalesInvoices = (email) => {
 };
 
 function App() {
-  const [currentUser, setCurrentUser] = useState(getSavedCurrentUser);
+  const [currentUser, setCurrentUser] = useState(() => getSavedCurrentUser());
   const [activePage, setActivePage] = useState("dashboard");
 
   const [transactions, setTransactions] = useState([]);
-    const savedUser = getSavedCurrentUser();
-
-    if (savedUser) {
-      return getSavedTransactions(savedUser.email);
-    }
-
-    return [];
-  };
+  const [parties, setParties] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [salesInvoices, setSalesInvoices] = useState([]);
 
   const [selectedTransactionId, setSelectedTransactionId] = useState(() => {
     const savedUser = getSavedCurrentUser();
@@ -168,12 +163,6 @@ function App() {
 
     return null;
   });
-
-    const [parties, setParties] = useState([]);
-
-    const [products, setProducts] = useState([]);
-
-  const [salesInvoices, setSalesInvoices] = useState([]);
 
   useEffect(() => {
   const loadProductsFromSupabase = async () => {
@@ -656,5 +645,5 @@ const goToDashboard = () => {
     </main>
   );
 }
-
+}
 export default App;
