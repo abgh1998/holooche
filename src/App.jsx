@@ -32,6 +32,13 @@ import {
   insertSalesInvoice,
 } from "./services/salesInvoicesApi";
 
+import {
+  fetchTransactions,
+  insertTransaction,
+  deleteTransactionRecord,
+  clearTransactionRecords,
+} from "./services/transactionsApi";
+
 const CURRENT_USER_KEY = "financeCurrentUser";
 
 const getSavedCurrentUser = () => {
@@ -142,7 +149,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(getSavedCurrentUser);
   const [activePage, setActivePage] = useState("dashboard");
 
-  const [transactions, setTransactions] = useState(() => {
+  const [transactions, setTransactions] = useState([]);
     const savedUser = getSavedCurrentUser();
 
     if (savedUser) {
@@ -150,7 +157,7 @@ function App() {
     }
 
     return [];
-  });
+  };
 
   const [selectedTransactionId, setSelectedTransactionId] = useState(() => {
     const savedUser = getSavedCurrentUser();
@@ -195,6 +202,26 @@ function App() {
       setParties([]);
       return;
     }
+    useEffect(() => {
+  const loadTransactionsFromSupabase = async () => {
+    if (!currentUser?.id) {
+      setTransactions([]);
+      return;
+    }
+
+    const { data, error } = await fetchTransactions(currentUser.id);
+
+    if (error) {
+      console.error("Fetch transactions error:", error);
+      alert("خطا در دریافت تراکنش‌ها از سرور");
+      return;
+    }
+
+    setTransactions(data);
+  };
+
+  loadTransactionsFromSupabase();
+}, [currentUser]);
 
     const { data, error } = await fetchParties(currentUser.id);
 
@@ -214,15 +241,6 @@ function App() {
  
 
   useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem(
-        getSalesInvoicesKey(currentUser.email),
-        JSON.stringify(salesInvoices)
-      );
-    }
-  }, [salesInvoices, currentUser]);
-
-  useEffect(() => {
     if (currentUser && selectedTransactionId) {
       localStorage.setItem(
         getSelectedTransactionKey(currentUser.email),
@@ -237,7 +255,7 @@ function App() {
 
   const handleLogin = (user) => {
     setCurrentUser(user);
-    setTransactions(getSavedTransactions(user.email));
+    setTransactions([]);
     setSelectedTransactionId(getSavedSelectedTransactionId(user.email));
     setParties([]);
     setProducts([]);
@@ -271,40 +289,84 @@ function App() {
     transactions[0] ||
     null;
 
-  const addTransaction = (transaction) => {
-    setTransactions((prevTransactions) => [transaction, ...prevTransactions]);
-    setSelectedTransactionId(transaction.id);
+   const addTransaction = async (transaction) => {
+  if (!currentUser?.id) {
+    alert("برای ثبت تراکنش باید وارد حساب کاربری شوید");
+    return;
+  }
+
+  const { data, error } = await insertTransaction(currentUser.id, {
+    ...transaction,
+    sourceType: "manual",
+    sourceId: null,
+  });
+
+  if (error) {
+    console.error("Insert transaction error:", error);
+    alert("خطا در ثبت تراکنش");
+    return;
+  }
+
+  setTransactions((prevTransactions) => [data, ...prevTransactions]);
+  setSelectedTransactionId(data.id);
   };
 
-  const deleteTransaction = (id) => {
-    setTransactions((prevTransactions) => {
-      const newTransactions = prevTransactions.filter(
-        (transaction) => transaction.id !== id
-      );
+  const deleteTransaction = async (id) => {
+  const confirmDelete = window.confirm(
+    "آیا مطمئن هستید که میخواهید این تراکنش حذف شود؟"
+  );
 
-      if (selectedTransactionId === id) {
-        setSelectedTransactionId(newTransactions[0]?.id || null);
-      }
+  if (!confirmDelete) {
+    return;
+  }
 
-      return newTransactions;
-    });
-  };
+  if (!currentUser?.id) {
+    alert("برای حذف تراکنش باید وارد حساب کاربری شوید");
+    return;
+  }
 
-  const clearTransactions = () => {
-    const confirmDelete = window.confirm(
-      "آیا مطمئن هستید که میخواهید همه تراکنش ها را پاک کنید؟"
-    );
+  const { error } = await deleteTransactionRecord(currentUser.id, id);
 
-    if (confirmDelete) {
-      setTransactions([]);
-      setSelectedTransactionId(null);
+  if (error) {
+    console.error("Delete transaction error:", error);
+    alert("خطا در حذف تراکنش");
+    return;
+  }
 
-      if (currentUser) {
-        localStorage.removeItem(getTransactionsKey(currentUser.email));
-        localStorage.removeItem(getSelectedTransactionKey(currentUser.email));
-      }
-    }
-  };
+  setTransactions((prevTransactions) =>
+    prevTransactions.filter((transaction) => transaction.id !== id)
+  );
+
+  if (String(selectedTransactionId) === String(id)) {
+    setSelectedTransactionId(null);
+  }
+};
+
+  const clearTransactions = async () => {
+  const confirmClear = window.confirm(
+    "آیا مطمئن هستید که میخواهید همه تراکنش‌ها حذف شوند؟"
+  );
+
+  if (!confirmClear) {
+    return;
+  }
+
+  if (!currentUser?.id) {
+    alert("برای حذف تراکنش‌ها باید وارد حساب کاربری شوید");
+    return;
+  }
+
+  const { error } = await clearTransactionRecords(currentUser.id);
+
+  if (error) {
+    console.error("Clear transactions error:", error);
+    alert("خطا در حذف همه تراکنش‌ها");
+    return;
+  }
+
+  setTransactions([]);
+  setSelectedTransactionId(null);
+};
 
  const addParty = async (party) => {
   if (!currentUser?.id) {
@@ -477,17 +539,24 @@ const updateProduct = async (updatedProduct) => {
     })
   );
 
-  const newTransaction = {
-    id: Date.now() + 1,
+  const { data: transactionData, error: transactionError } =
+  await insertTransaction(currentUser.id, {
     title: `فروش - ${data.invoiceNumber}`,
     amount: Number(data.finalTotal),
     type: "income",
     date: data.createdAt,
-  };
+    sourceType: "sales_invoice",
+    sourceId: data.id,
+  });
 
-  setTransactions((prevTransactions) => [newTransaction, ...prevTransactions]);
-  setSelectedTransactionId(newTransaction.id);
-};
+if (transactionError) {
+  console.error("Insert sales transaction error:", transactionError);
+  alert("فاکتور ثبت شد، اما تراکنش مالی آن ثبت نشد");
+  return;
+}
+
+setTransactions((prevTransactions) => [transactionData, ...prevTransactions]);
+setSelectedTransactionId(transactionData.id);
 
 const goToDashboard = () => {
   setActivePage("dashboard");
