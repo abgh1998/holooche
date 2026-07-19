@@ -9,6 +9,9 @@ const invoiceSelect = `
   subtotal,
   total_discount,
   final_total,
+  payment_status,
+  paid_amount,
+  remaining_amount,
   note,
   created_at,
   updated_at,
@@ -56,13 +59,40 @@ const mapInvoiceFromDb = (invoice) => {
     subtotal: Number(invoice.subtotal || 0),
     totalDiscount: Number(invoice.total_discount || 0),
     finalTotal: Number(invoice.final_total || 0),
+    paymentStatus: invoice.payment_status || "unpaid",
+    paidAmount: Number(invoice.paid_amount || 0),
+    remainingAmount: Number(
+      invoice.remaining_amount ?? Number(invoice.final_total || 0)
+    ),
     note: invoice.note || "",
     createdAt: invoice.created_at,
     updatedAt: invoice.updated_at,
   };
 };
 
+const getPaymentStatus = (finalTotal, paidAmount) => {
+  const finalValue = Number(finalTotal || 0);
+  const paidValue = Number(paidAmount || 0);
+
+  if (paidValue <= 0) {
+    return "unpaid";
+  }
+
+  if (paidValue >= finalValue) {
+    return "paid";
+  }
+
+  return "partial";
+};
+
 const mapInvoiceToDb = (userId, invoice) => {
+  const finalTotal = Number(invoice.finalTotal || 0);
+  const paidAmount = Number(invoice.paidAmount || 0);
+  const remainingAmount =
+    invoice.remainingAmount !== undefined
+      ? Number(invoice.remainingAmount || 0)
+      : Math.max(finalTotal - paidAmount, 0);
+
   return {
     user_id: userId,
     invoice_number: invoice.invoiceNumber,
@@ -70,7 +100,10 @@ const mapInvoiceToDb = (userId, invoice) => {
     customer_name: invoice.customerName,
     subtotal: Number(invoice.subtotal || 0),
     total_discount: Number(invoice.totalDiscount || 0),
-    final_total: Number(invoice.finalTotal || 0),
+    final_total: finalTotal,
+    payment_status: invoice.paymentStatus || getPaymentStatus(finalTotal, paidAmount),
+    paid_amount: paidAmount,
+    remaining_amount: remainingAmount,
     note: invoice.note || "",
   };
 };
@@ -113,11 +146,21 @@ export const fetchSalesInvoices = async (userId) => {
 };
 
 export const insertSalesInvoice = async (userId, invoice) => {
+  const invoicePayload = {
+    ...invoice,
+    paymentStatus: invoice.paymentStatus || "unpaid",
+    paidAmount: Number(invoice.paidAmount || 0),
+    remainingAmount:
+      invoice.remainingAmount !== undefined
+        ? Number(invoice.remainingAmount || 0)
+        : Number(invoice.finalTotal || 0),
+  };
+
   const { data: invoiceData, error: invoiceError } = await supabase
     .from("sales_invoices")
-    .insert([mapInvoiceToDb(userId, invoice)])
+    .insert([mapInvoiceToDb(userId, invoicePayload)])
     .select(
-      "id, user_id, invoice_number, customer_id, customer_name, subtotal, total_discount, final_total, note, created_at, updated_at"
+      "id, user_id, invoice_number, customer_id, customer_name, subtotal, total_discount, final_total, payment_status, paid_amount, remaining_amount, note, created_at, updated_at"
     )
     .single();
 
@@ -169,6 +212,40 @@ export const insertSalesInvoice = async (userId, invoice) => {
       ...invoiceData,
       sales_invoice_rows: rowsData || [],
     }),
+    error: null,
+  };
+};
+
+export const updateSalesInvoiceSettlement = async (
+  userId,
+  invoiceId,
+  finalTotal,
+  paidAmount
+) => {
+  const finalValue = Number(finalTotal || 0);
+  const paidValue = Number(paidAmount || 0);
+  const remainingAmount = Math.max(finalValue - paidValue, 0);
+  const paymentStatus = getPaymentStatus(finalValue, paidValue);
+
+  const { data, error } = await supabase
+    .from("sales_invoices")
+    .update({
+      payment_status: paymentStatus,
+      paid_amount: paidValue,
+      remaining_amount: remainingAmount,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", invoiceId)
+    .eq("user_id", userId)
+    .select(invoiceSelect)
+    .single();
+
+  if (error) {
+    return { data: null, error };
+  }
+
+  return {
+    data: mapInvoiceFromDb(data),
     error: null,
   };
 };

@@ -10,6 +10,7 @@ function CustomerLedgerPage({
   onBack,
 }) {
   const [selectedPartyId, setSelectedPartyId] = useState("");
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState("");
   const [paymentType, setPaymentType] = useState("receive");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [amount, setAmount] = useState("");
@@ -25,6 +26,20 @@ function CustomerLedgerPage({
 
   const selectedParty = availableParties.find(
     (party) => String(party.id) === String(selectedPartyId)
+  );
+
+  const selectedPartyInvoices = salesInvoices.filter((invoice) => {
+    const remaining = Number(
+      invoice.remainingAmount ?? invoice.finalTotal ?? 0
+    );
+
+    return (
+      String(invoice.customerId) === String(selectedPartyId) && remaining > 0
+    );
+  });
+
+  const selectedInvoice = selectedPartyInvoices.find(
+    (invoice) => String(invoice.id) === String(selectedInvoiceId)
   );
 
   const formatNumberInput = (value) => {
@@ -60,7 +75,6 @@ function CustomerLedgerPage({
     }
 
     const entries = [];
-
     const openingBalance = Number(selectedParty.openingBalance || 0);
 
     if (openingBalance > 0) {
@@ -70,7 +84,8 @@ function CustomerLedgerPage({
         title: "مانده اول دوره",
         date: selectedParty.createdAt || new Date().toISOString(),
         debit: selectedParty.balanceStatus === "debtor" ? openingBalance : 0,
-        credit: selectedParty.balanceStatus === "creditor" ? openingBalance : 0,
+        credit:
+          selectedParty.balanceStatus === "creditor" ? openingBalance : 0,
         description:
           selectedParty.balanceStatus === "debtor"
             ? "بدهکار اول دوره"
@@ -92,7 +107,7 @@ function CustomerLedgerPage({
         date: invoice.createdAt,
         debit: Number(invoice.finalTotal || 0),
         credit: 0,
-        description: "فاکتور فروش",
+        description: getInvoiceStatusLabel(invoice.paymentStatus),
       });
     });
 
@@ -102,6 +117,9 @@ function CustomerLedgerPage({
 
     payments.forEach((payment) => {
       const isReceive = payment.paymentType === "receive";
+      const relatedInvoice = salesInvoices.find(
+        (invoice) => String(invoice.id) === String(payment.invoiceId)
+      );
 
       entries.push({
         id: `payment-${payment.id}`,
@@ -111,9 +129,15 @@ function CustomerLedgerPage({
         date: payment.paymentDate,
         debit: isReceive ? 0 : Number(payment.amount || 0),
         credit: isReceive ? Number(payment.amount || 0) : 0,
-        description: payment.note || payment.referenceNumber || "-",
+        description:
+          payment.note ||
+          payment.referenceNumber ||
+          (relatedInvoice
+            ? `بابت فاکتور ${relatedInvoice.invoiceNumber}`
+            : "-"),
         paymentMethod: payment.paymentMethod,
         referenceNumber: payment.referenceNumber,
+        invoiceNumber: relatedInvoice?.invoiceNumber || "",
       });
     });
 
@@ -162,11 +186,35 @@ function CustomerLedgerPage({
     return "تسویه";
   };
 
+  function getInvoiceStatusLabel(status) {
+    if (status === "paid") {
+      return "تسویه شده";
+    }
+
+    if (status === "partial") {
+      return "نیمه تسویه";
+    }
+
+    return "پرداخت نشده";
+  }
+
   const getPaymentMethodLabel = (method) => {
-    if (method === "cash") return "نقدی";
-    if (method === "card") return "کارت";
-    if (method === "bank") return "حواله بانکی";
-    if (method === "check") return "چک";
+    if (method === "cash") {
+      return "نقدی";
+    }
+
+    if (method === "card") {
+      return "کارت";
+    }
+
+    if (method === "bank") {
+      return "حواله بانکی";
+    }
+
+    if (method === "check") {
+      return "چک";
+    }
+
     return method;
   };
 
@@ -185,8 +233,20 @@ function CustomerLedgerPage({
       return;
     }
 
+    if (selectedInvoice) {
+      const invoiceRemaining = Number(
+        selectedInvoice.remainingAmount ?? selectedInvoice.finalTotal ?? 0
+      );
+
+      if (pureAmount > invoiceRemaining) {
+        alert("مبلغ دریافت نباید بیشتر از مانده فاکتور باشد");
+        return;
+      }
+    }
+
     onAddPartyPayment({
       partyId: selectedParty.id,
+      invoiceId: selectedInvoice ? selectedInvoice.id : null,
       paymentType,
       amount: pureAmount,
       paymentMethod,
@@ -198,6 +258,7 @@ function CustomerLedgerPage({
     setAmount("");
     setReferenceNumber("");
     setNote("");
+    setSelectedInvoiceId("");
     setPaymentType("receive");
     setPaymentMethod("cash");
   };
@@ -209,19 +270,19 @@ function CustomerLedgerPage({
     }
 
     const rowsHtml = ledgerData.entries
-      .map((entry, index) => {
-        return `
-          <tr>
-            <td>${(index + 1).toLocaleString("fa-IR")}</td>
-            <td>${new Date(entry.date).toLocaleDateString("fa-IR")}</td>
-            <td>${entry.title}</td>
-            <td>${entry.description}</td>
-            <td>${entry.debit ? formatMoney(entry.debit) : "-"}</td>
-            <td>${entry.credit ? formatMoney(entry.credit) : "-"}</td>
-            <td>${getBalanceText(entry.runningBalance)}</td>
-          </tr>
-        `;
-      })
+      .map(
+        (entry, index) => `
+      <tr>
+        <td>${(index + 1).toLocaleString("fa-IR")}</td>
+        <td>${new Date(entry.date).toLocaleDateString("fa-IR")}</td>
+        <td>${entry.title}</td>
+        <td>${entry.description}</td>
+        <td>${entry.debit ? formatMoney(entry.debit) : "-"}</td>
+        <td>${entry.credit ? formatMoney(entry.credit) : "-"}</td>
+        <td>${getBalanceText(entry.runningBalance)}</td>
+      </tr>
+    `
+      )
       .join("");
 
     const printWindow = window.open("", "_blank");
@@ -282,8 +343,11 @@ function CustomerLedgerPage({
 
         <body>
           <h1>صورت حساب طرف حساب</h1>
+
           <div class="info">نام طرف حساب: ${selectedParty.name}</div>
-          <div class="info">تاریخ چاپ: ${new Date().toLocaleString("fa-IR")}</div>
+          <div class="info">تاریخ چاپ: ${new Date().toLocaleString(
+            "fa-IR"
+          )}</div>
 
           <table>
             <thead>
@@ -335,7 +399,11 @@ function CustomerLedgerPage({
           </div>
 
           {onBack && (
-            <button type="button" className="ledger-back-btn" onClick={onBack}>
+            <button
+              type="button"
+              className="ledger-back-btn"
+              onClick={onBack}
+            >
               بازگشت
             </button>
           )}
@@ -346,9 +414,13 @@ function CustomerLedgerPage({
 
           <select
             value={selectedPartyId}
-            onChange={(e) => setSelectedPartyId(e.target.value)}
+            onChange={(e) => {
+              setSelectedPartyId(e.target.value);
+              setSelectedInvoiceId("");
+            }}
           >
             <option value="">انتخاب کنید</option>
+
             {availableParties.map((party) => (
               <option key={party.id} value={party.id}>
                 {party.name}
@@ -382,17 +454,51 @@ function CustomerLedgerPage({
               <div className="ledger-form-grid">
                 <div>
                   <label>نوع عملیات</label>
+
                   <select
                     value={paymentType}
-                    onChange={(e) => setPaymentType(e.target.value)}
+                    onChange={(e) => {
+                      setPaymentType(e.target.value);
+
+                      if (e.target.value === "pay") {
+                        setSelectedInvoiceId("");
+                      }
+                    }}
                   >
                     <option value="receive">دریافت از مشتری</option>
                     <option value="pay">پرداخت به طرف حساب</option>
                   </select>
                 </div>
 
+                {paymentType === "receive" && (
+                  <div>
+                    <label>تسویه فاکتور</label>
+
+                    <select
+                      value={selectedInvoiceId}
+                      onChange={(e) => setSelectedInvoiceId(e.target.value)}
+                    >
+                      <option value="">بدون اتصال به فاکتور</option>
+
+                      {selectedPartyInvoices.map((invoice) => {
+                        const remaining = Number(
+                          invoice.remainingAmount ?? invoice.finalTotal ?? 0
+                        );
+
+                        return (
+                          <option key={invoice.id} value={invoice.id}>
+                            {invoice.invoiceNumber} - مانده:{" "}
+                            {formatMoney(remaining)}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                )}
+
                 <div>
                   <label>روش پرداخت</label>
+
                   <select
                     value={paymentMethod}
                     onChange={(e) => setPaymentMethod(e.target.value)}
@@ -406,6 +512,7 @@ function CustomerLedgerPage({
 
                 <div>
                   <label>مبلغ</label>
+
                   <input
                     type="text"
                     inputMode="numeric"
@@ -419,6 +526,7 @@ function CustomerLedgerPage({
 
                 <div>
                   <label>شماره پیگیری / چک</label>
+
                   <input
                     type="text"
                     value={referenceNumber}
@@ -429,6 +537,7 @@ function CustomerLedgerPage({
 
                 <div className="full">
                   <label>توضیحات</label>
+
                   <input
                     type="text"
                     value={note}
@@ -472,21 +581,31 @@ function CustomerLedgerPage({
                         <td>
                           {new Date(entry.date).toLocaleDateString("fa-IR")}
                         </td>
+
                         <td>{entry.title}</td>
+
                         <td>
                           {entry.type === "payment"
                             ? `${getPaymentMethodLabel(entry.paymentMethod)} ${
                                 entry.referenceNumber
                                   ? `- ${entry.referenceNumber}`
                                   : ""
+                              } ${
+                                entry.invoiceNumber
+                                  ? `- فاکتور ${entry.invoiceNumber}`
+                                  : ""
                               }`
                             : entry.description}
                         </td>
+
                         <td>{entry.debit ? formatMoney(entry.debit) : "-"}</td>
+
                         <td>
                           {entry.credit ? formatMoney(entry.credit) : "-"}
                         </td>
+
                         <td>{getBalanceText(entry.runningBalance)}</td>
+
                         <td>
                           {entry.type === "payment" ? (
                             <button

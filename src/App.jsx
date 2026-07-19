@@ -33,6 +33,7 @@ import {
 import {
   fetchSalesInvoices,
   insertSalesInvoice,
+  updateSalesInvoiceSettlement,
 } from "./services/salesInvoicesApi";
 
 import {
@@ -356,6 +357,45 @@ function App() {
 
     setPartyPayments((prevPayments) => [data, ...prevPayments]);
 
+    if (data.invoiceId && data.paymentType === "receive") {
+      const relatedInvoice = salesInvoices.find(
+        (invoice) => String(invoice.id) === String(data.invoiceId)
+      );
+
+      if (relatedInvoice) {
+        const previousPaidAmount = partyPayments
+          .filter(
+            (item) =>
+              String(item.invoiceId) === String(data.invoiceId) &&
+              item.paymentType === "receive"
+          )
+          .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+        const totalPaid = previousPaidAmount + Number(data.amount || 0);
+
+        const { data: updatedInvoice, error: settlementError } =
+          await updateSalesInvoiceSettlement(
+            currentUser.id,
+            relatedInvoice.id,
+            relatedInvoice.finalTotal,
+            totalPaid
+          );
+
+        if (settlementError) {
+          console.error("Update invoice settlement error:", settlementError);
+          alert("دریافت ثبت شد، اما وضعیت تسویه فاکتور آپدیت نشد");
+        }
+
+        if (!settlementError && updatedInvoice) {
+          setSalesInvoices((prevInvoices) =>
+            prevInvoices.map((invoice) =>
+              invoice.id === updatedInvoice.id ? updatedInvoice : invoice
+            )
+          );
+        }
+      }
+    }
+
     const party = parties.find(
       (item) => String(item.id) === String(data.partyId)
     );
@@ -401,6 +441,10 @@ function App() {
       return;
     }
 
+    const deletedPayment = partyPayments.find(
+      (payment) => String(payment.id) === String(paymentId)
+    );
+
     const { error } = await deletePartyPaymentRecord(currentUser.id, paymentId);
 
     if (error) {
@@ -423,6 +467,47 @@ function App() {
 
       if (transactionDeleteError) {
         console.error("Delete linked transaction error:", transactionDeleteError);
+      }
+    }
+
+    if (
+      deletedPayment?.invoiceId &&
+      deletedPayment.paymentType === "receive"
+    ) {
+      const relatedInvoice = salesInvoices.find(
+        (invoice) => String(invoice.id) === String(deletedPayment.invoiceId)
+      );
+
+      if (relatedInvoice) {
+        const totalPaidAfterDelete = partyPayments
+          .filter(
+            (item) =>
+              String(item.invoiceId) === String(deletedPayment.invoiceId) &&
+              String(item.id) !== String(paymentId) &&
+              item.paymentType === "receive"
+          )
+          .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+        const { data: updatedInvoice, error: settlementError } =
+          await updateSalesInvoiceSettlement(
+            currentUser.id,
+            relatedInvoice.id,
+            relatedInvoice.finalTotal,
+            totalPaidAfterDelete
+          );
+
+        if (settlementError) {
+          console.error("Update invoice settlement after delete error:", settlementError);
+          alert("دریافت حذف شد، اما وضعیت تسویه فاکتور آپدیت نشد");
+        }
+
+        if (!settlementError && updatedInvoice) {
+          setSalesInvoices((prevInvoices) =>
+            prevInvoices.map((invoice) =>
+              invoice.id === updatedInvoice.id ? updatedInvoice : invoice
+            )
+          );
+        }
       }
     }
 

@@ -4,6 +4,7 @@ const paymentSelect = `
   id,
   user_id,
   party_id,
+  invoice_id,
   payment_type,
   amount,
   payment_method,
@@ -19,6 +20,7 @@ const mapPaymentFromDb = (payment) => {
     id: payment.id,
     userId: payment.user_id,
     partyId: payment.party_id,
+    invoiceId: payment.invoice_id,
     paymentType: payment.payment_type,
     amount: Number(payment.amount || 0),
     paymentMethod: payment.payment_method || "cash",
@@ -34,6 +36,7 @@ const mapPaymentToDb = (userId, payment) => {
   return {
     user_id: userId,
     party_id: payment.partyId,
+    invoice_id: payment.invoiceId || null,
     payment_type: payment.paymentType || "receive",
     amount: Number(payment.amount || 0),
     payment_method: payment.paymentMethod || "cash",
