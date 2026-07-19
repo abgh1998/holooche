@@ -13,6 +13,7 @@ import CustomersPage from "./components/CustomersPage";
 import ProductsPage from "./components/ProductsPage";
 import SalesInvoicePage from "./components/SalesInvoicePage";
 import ReportsPage from "./components/ReportsPage";
+import CustomerLedgerPage from "./components/CustomerLedgerPage";
 import { supabase } from "./lib/supabaseClient";
 
 import {
@@ -40,6 +41,12 @@ import {
   deleteTransactionRecord,
   clearTransactionRecords,
 } from "./services/transactionsApi";
+
+import {
+  fetchPartyPayments,
+  insertPartyPayment,
+  deletePartyPaymentRecord,
+} from "./services/partyPaymentsApi";
 
 const CURRENT_USER_KEY = "financeCurrentUser";
 
@@ -83,6 +90,7 @@ function App() {
   const [parties, setParties] = useState([]);
   const [products, setProducts] = useState([]);
   const [salesInvoices, setSalesInvoices] = useState([]);
+  const [partyPayments, setPartyPayments] = useState([]);
 
   const [selectedTransactionId, setSelectedTransactionId] = useState(() => {
     const savedUser = getSavedCurrentUser();
@@ -179,6 +187,27 @@ function App() {
   }, [currentUser]);
 
   useEffect(() => {
+    const loadPartyPaymentsFromSupabase = async () => {
+      if (!currentUser?.id) {
+        setPartyPayments([]);
+        return;
+      }
+
+      const { data, error } = await fetchPartyPayments(currentUser.id);
+
+      if (error) {
+        console.error("Fetch party payments error:", error);
+        alert("خطا در دریافت دریافت‌ها و پرداخت‌ها از سرور");
+        return;
+      }
+
+      setPartyPayments(data);
+    };
+
+    loadPartyPaymentsFromSupabase();
+  }, [currentUser]);
+
+  useEffect(() => {
     if (currentUser?.email && selectedTransactionId) {
       localStorage.setItem(
         getSelectedTransactionKey(currentUser.email),
@@ -202,6 +231,7 @@ function App() {
     setParties([]);
     setProducts([]);
     setSalesInvoices([]);
+    setPartyPayments([]);
     setActivePage("dashboard");
   };
 
@@ -220,6 +250,7 @@ function App() {
     setParties([]);
     setProducts([]);
     setSalesInvoices([]);
+    setPartyPayments([]);
     setActivePage("dashboard");
   };
 
@@ -307,6 +338,110 @@ function App() {
 
     setTransactions([]);
     setSelectedTransactionId(null);
+  };
+
+  const addPartyPayment = async (payment) => {
+    if (!currentUser?.id) {
+      alert("برای ثبت دریافت یا پرداخت باید وارد حساب کاربری شوید");
+      return;
+    }
+
+    const { data, error } = await insertPartyPayment(currentUser.id, payment);
+
+    if (error) {
+      console.error("Insert party payment error:", error);
+      alert("خطا در ثبت دریافت یا پرداخت");
+      return;
+    }
+
+    setPartyPayments((prevPayments) => [data, ...prevPayments]);
+
+    const party = parties.find(
+      (item) => String(item.id) === String(data.partyId)
+    );
+
+    const isReceive = data.paymentType === "receive";
+
+    const { data: transactionData, error: transactionError } =
+      await insertTransaction(currentUser.id, {
+        title: `${isReceive ? "دریافت از" : "پرداخت به"} ${
+          party?.name || "طرف حساب"
+        }`,
+        amount: Number(data.amount),
+        type: isReceive ? "income" : "expense",
+        date: data.paymentDate,
+        sourceType: "party_payment",
+        sourceId: data.id,
+      });
+
+    if (transactionError) {
+      console.error("Insert party payment transaction error:", transactionError);
+      alert("دریافت/پرداخت ثبت شد، اما تراکنش مالی آن ثبت نشد");
+      return;
+    }
+
+    setTransactions((prevTransactions) => [
+      transactionData,
+      ...prevTransactions,
+    ]);
+    setSelectedTransactionId(transactionData.id);
+  };
+
+  const deletePartyPayment = async (paymentId) => {
+    const confirmDelete = window.confirm(
+      "آیا مطمئن هستید که میخواهید این دریافت یا پرداخت حذف شود؟"
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    if (!currentUser?.id) {
+      alert("برای حذف دریافت یا پرداخت باید وارد حساب کاربری شوید");
+      return;
+    }
+
+    const { error } = await deletePartyPaymentRecord(currentUser.id, paymentId);
+
+    if (error) {
+      console.error("Delete party payment error:", error);
+      alert("خطا در حذف دریافت یا پرداخت");
+      return;
+    }
+
+    const linkedTransaction = transactions.find(
+      (transaction) =>
+        transaction.sourceType === "party_payment" &&
+        String(transaction.sourceId) === String(paymentId)
+    );
+
+    if (linkedTransaction) {
+      const { error: transactionDeleteError } = await deleteTransactionRecord(
+        currentUser.id,
+        linkedTransaction.id
+      );
+
+      if (transactionDeleteError) {
+        console.error("Delete linked transaction error:", transactionDeleteError);
+      }
+    }
+
+    setPartyPayments((prevPayments) =>
+      prevPayments.filter((payment) => String(payment.id) !== String(paymentId))
+    );
+
+    if (linkedTransaction) {
+      setTransactions((prevTransactions) =>
+        prevTransactions.filter(
+          (transaction) =>
+            String(transaction.id) !== String(linkedTransaction.id)
+        )
+      );
+
+      if (String(selectedTransactionId) === String(linkedTransaction.id)) {
+        setSelectedTransactionId(null);
+      }
+    }
   };
 
   const addParty = async (party) => {
@@ -564,6 +699,19 @@ function App() {
           onAddParty={addParty}
           onDeleteParty={deleteParty}
           onUpdateParty={updateParty}
+        />
+      );
+    }
+
+    if (activePage === "ledger") {
+      return (
+        <CustomerLedgerPage
+          parties={parties}
+          salesInvoices={salesInvoices}
+          partyPayments={partyPayments}
+          onAddPartyPayment={addPartyPayment}
+          onDeletePartyPayment={deletePartyPayment}
+          onBack={goToDashboard}
         />
       );
     }

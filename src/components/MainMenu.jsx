@@ -1,61 +1,54 @@
-const menuItems = [
-  {
-    id: "dashboard",
-    title: "صفحه اصلی",
-    icon: "🏠",
-  },
-  {
-    id: "cash",
-    title: "صندوق",
-    icon: "💰",
-  },
-  {
-    id: "sales",
-    title: "فاکتور فروش",
-    icon: "🧾",
-  },
-  {
-    id: "products",
-    title: "کالاها و خدمات",
-    icon: "📦",
-  },
-  {
-    id: "customers",
-    title: "مشتریان",
-    icon: "👥",
-  },
-  {
-    id: "reports",
-    title: "گزارش‌ها",
-    icon: "📊",
-  },
-];
-
 function MainMenu({ activePage, onChangePage }) {
+  const menuItems = [
+    {
+      id: "dashboard",
+      title: "داشبورد",
+    },
+    {
+      id: "cash",
+      title: "صندوق",
+    },
+    {
+      id: "sales",
+      title: "فاکتور فروش",
+    },
+    {
+      id: "products",
+      title: "کالاها و خدمات",
+    },
+    {
+      id: "customers",
+      title: "طرف حساب‌ها",
+    },
+    {
+      id: "ledger",
+      title: "دفتر حساب",
+    },
+    {
+      id: "reports",
+      title: "گزارش‌ها",
+    },
+  ];
+
   return (
-    <aside className="sidebar">
-      <div className="sidebar-title">
-        <span>Holooche</span>
-        <small>سیستم مالی</small>
+    <aside className="main-menu">
+      <div className="menu-title">
+        <h2>هلوچه</h2>
+        <p>سیستم حسابداری</p>
       </div>
 
-      <nav className="sidebar-nav">
+      <div className="menu-items">
         {menuItems.map((item) => (
           <button
             key={item.id}
             type="button"
-            className={
-              activePage === item.id
-                ? "sidebar-link sidebar-link-active"
-                : "sidebar-link"
-            }
+            className={activePage === item.id ? "active" : ""}
             onClick={() => onChangePage(item.id)}
           >
-            <span className="sidebar-icon">{item.icon}</span>
-            <span>{item.title}</span>
+            {item.title}
           </button>
         ))}
-      </nav>
+      </div>
     </aside>
   );
 }
