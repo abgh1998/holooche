@@ -165,67 +165,69 @@ function App() {
   });
 
   useEffect(() => {
-    const loadProductsFromSupabase = async () => {
-      if (!currentUser?.id) {
-        setProducts([]);
-        return;
-      }
+  const loadProductsFromSupabase = async () => {
+    if (!currentUser?.id) {
+      setProducts([]);
+      return;
+    }
 
-      const { data, error } = await fetchProducts(currentUser.id);
+    const { data, error } = await fetchProducts(currentUser.id);
 
-      if (error) {
-        console.error("Fetch products error:", error);
-        alert("خطا در دریافت کالاها و خدمات از سرور");
-        return;
-      }
+    if (error) {
+      console.error("Fetch products error:", error);
+      alert("خطا در دریافت کالاها و خدمات از سرور");
+      return;
+    }
 
-      setProducts(data);
-    };
+    setProducts(data);
+  };
 
-    loadProductsFromSupabase();
-  }, [currentUser]);
+  loadProductsFromSupabase();
+}, [currentUser]);
 
-  useEffect(() => {
-    const loadPartiesFromSupabase = async () => {
-      if (!currentUser?.id) {
-        setParties([]);
-        return;
-      }
+ useEffect(() => {
+  const loadPartiesFromSupabase = async () => {
+    if (!currentUser?.id) {
+      setParties([]);
+      return;
+    }
+    useEffect(() => {
+  const loadTransactionsFromSupabase = async () => {
+    if (!currentUser?.id) {
+      setTransactions([]);
+      return;
+    }
 
-      const { data, error } = await fetchParties(currentUser.id);
+    const { data, error } = await fetchTransactions(currentUser.id);
 
-      if (error) {
-        console.error("Fetch parties error:", error);
-        alert("خطا در دریافت طرف حساب‌ها از سرور");
-        return;
-      }
+    if (error) {
+      console.error("Fetch transactions error:", error);
+      alert("خطا در دریافت تراکنش‌ها از سرور");
+      return;
+    }
 
-      setParties(data);
-    };
+    setTransactions(data);
+  };
 
-    loadPartiesFromSupabase();
-  }, [currentUser]);
+  loadTransactionsFromSupabase();
+}, [currentUser]);
 
-  useEffect(() => {
-    const loadTransactionsFromSupabase = async () => {
-      if (!currentUser?.id) {
-        setTransactions([]);
-        return;
-      }
+    const { data, error } = await fetchParties(currentUser.id);
 
-      const { data, error } = await fetchTransactions(currentUser.id);
+    if (error) {
+      console.error("Fetch parties error:", error);
+      alert("خطا در دریافت طرف حساب‌ها از سرور");
+      return;
+    }
 
-      if (error) {
-        console.error("Fetch transactions error:", error);
-        alert("خطا در دریافت تراکنش‌ها از سرور");
-        return;
-      }
+    setParties(data);
+  };
 
-      setTransactions(data);
-    };
+  loadPartiesFromSupabase();
+}, [currentUser]);
 
-    loadTransactionsFromSupabase();
-  }, [currentUser]);
+
+ 
 
   useEffect(() => {
     if (currentUser && selectedTransactionId) {
@@ -643,6 +645,4 @@ const goToDashboard = () => {
     </main>
   );
 }
-}
 
-export default App;
