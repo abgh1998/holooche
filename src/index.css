@@ -872,9 +872,7 @@ tbody tr:hover {
   font-weight: 950;
 }
 
-/* =========================================================
-   Animations
-   ========================================================= */
+
 
 @keyframes fadeIn {
   from {
@@ -1499,5 +1497,114 @@ tbody tr:hover {
 
   .form-card h2 {
     font-size: 19px;
+  }
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+}
+
+.main-menu {
+  width: 260px;
+  min-width: 260px;
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  padding: 20px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid #fed7aa;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+  direction: rtl;
+}
+
+.menu-title {
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #fed7aa;
+}
+
+.menu-title h2 {
+  margin: 0;
+  color: #c2410c;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.menu-title p {
+  margin: 6px 0 0;
+  color: #9a3412;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.menu-items button {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  background: #fffaf5;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: right;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-items button:hover {
+  background: #ffedd5;
+  color: #c2410c;
+  border-color: #fed7aa;
+}
+
+.menu-items button.active {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #ffffff;
+  border-color: #f97316;
+  box-shadow: 0 12px 24px rgba(249, 115, 22, 0.25);
+}
+
+.app-content {
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .main-menu {
+    position: static;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .menu-items {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .menu-items button {
+    text-align: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .menu-items {
+    grid-template-columns: 1fr;
   }
 }
