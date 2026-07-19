@@ -14,12 +14,14 @@ import ProductsPage from "./components/ProductsPage";
 import SalesInvoicePage from "./components/SalesInvoicePage";
 import ReportsPage from "./components/ReportsPage";
 import { supabase } from "./lib/supabaseClient";
+
 import {
   fetchParties,
   insertParty,
   updatePartyRecord,
   deletePartyRecord,
 } from "./services/partiesApi";
+
 import {
   fetchProducts,
   insertProduct,
@@ -59,38 +61,8 @@ const getSafeEmailKey = (email) => {
   return email.replace(/[^a-zA-Z0-9]/g, "_");
 };
 
-const getTransactionsKey = (email) => {
-  return `transactions_${getSafeEmailKey(email)}`;
-};
-
 const getSelectedTransactionKey = (email) => {
   return `selectedTransactionId_${getSafeEmailKey(email)}`;
-};
-
-const getPartiesKey = (email) => {
-  return `parties_${getSafeEmailKey(email)}`;
-};
-
-const getProductsKey = (email) => {
-  return `products_${getSafeEmailKey(email)}`;
-};
-
-const getSalesInvoicesKey = (email) => {
-  return `salesInvoices_${getSafeEmailKey(email)}`;
-};
-
-const getSavedTransactions = (email) => {
-  const savedTransactions = localStorage.getItem(getTransactionsKey(email));
-
-  if (savedTransactions) {
-    try {
-      return JSON.parse(savedTransactions);
-    } catch {
-      return [];
-    }
-  }
-
-  return [];
 };
 
 const getSavedSelectedTransactionId = (email) => {
@@ -101,48 +73,6 @@ const getSavedSelectedTransactionId = (email) => {
   }
 
   return null;
-};
-
-const getSavedParties = (email) => {
-  const savedParties = localStorage.getItem(getPartiesKey(email));
-
-  if (savedParties) {
-    try {
-      return JSON.parse(savedParties);
-    } catch {
-      return [];
-    }
-  }
-
-  return [];
-};
-
-const getSavedProducts = (email) => {
-  const savedProducts = localStorage.getItem(getProductsKey(email));
-
-  if (savedProducts) {
-    try {
-      return JSON.parse(savedProducts);
-    } catch {
-      return [];
-    }
-  }
-
-  return [];
-};
-
-const getSavedSalesInvoices = (email) => {
-  const savedInvoices = localStorage.getItem(getSalesInvoicesKey(email));
-
-  if (savedInvoices) {
-    try {
-      return JSON.parse(savedInvoices);
-    } catch {
-      return [];
-    }
-  }
-
-  return [];
 };
 
 function App() {
@@ -157,7 +87,7 @@ function App() {
   const [selectedTransactionId, setSelectedTransactionId] = useState(() => {
     const savedUser = getSavedCurrentUser();
 
-    if (savedUser) {
+    if (savedUser?.email) {
       return getSavedSelectedTransactionId(savedUser.email);
     }
 
@@ -228,22 +158,47 @@ function App() {
   }, [currentUser]);
 
   useEffect(() => {
-    if (currentUser && selectedTransactionId) {
+    const loadSalesInvoicesFromSupabase = async () => {
+      if (!currentUser?.id) {
+        setSalesInvoices([]);
+        return;
+      }
+
+      const { data, error } = await fetchSalesInvoices(currentUser.id);
+
+      if (error) {
+        console.error("Fetch sales invoices error:", error);
+        alert("خطا در دریافت فاکتورهای فروش از سرور");
+        return;
+      }
+
+      setSalesInvoices(data);
+    };
+
+    loadSalesInvoicesFromSupabase();
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser?.email && selectedTransactionId) {
       localStorage.setItem(
         getSelectedTransactionKey(currentUser.email),
         selectedTransactionId
       );
     }
 
-    if (currentUser && !selectedTransactionId) {
+    if (currentUser?.email && !selectedTransactionId) {
       localStorage.removeItem(getSelectedTransactionKey(currentUser.email));
     }
   }, [selectedTransactionId, currentUser]);
 
   const handleLogin = (user) => {
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+
     setCurrentUser(user);
     setTransactions([]);
-    setSelectedTransactionId(getSavedSelectedTransactionId(user.email));
+    setSelectedTransactionId(
+      user?.email ? getSavedSelectedTransactionId(user.email) : null
+    );
     setParties([]);
     setProducts([]);
     setSalesInvoices([]);
@@ -251,303 +206,306 @@ function App() {
   };
 
   const handleLogout = async () => {
-  const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
 
-  if (error) {
-    console.error("Logout error:", error);
-  }
+    if (error) {
+      console.error("Logout error:", error);
+    }
 
-  localStorage.removeItem(CURRENT_USER_KEY);
+    localStorage.removeItem(CURRENT_USER_KEY);
 
-  setCurrentUser(null);
-  setTransactions([]);
-  setSelectedTransactionId(null);
-  setParties([]);
-  setProducts([]);
-  setSalesInvoices([]);
-  setActivePage("dashboard");
-};
-
+    setCurrentUser(null);
+    setTransactions([]);
+    setSelectedTransactionId(null);
+    setParties([]);
+    setProducts([]);
+    setSalesInvoices([]);
+    setActivePage("dashboard");
+  };
 
   const selectedTransaction =
     transactions.find(
-      (transaction) => transaction.id === selectedTransactionId
+      (transaction) => String(transaction.id) === String(selectedTransactionId)
     ) ||
     transactions[0] ||
     null;
 
-   const addTransaction = async (transaction) => {
-  if (!currentUser?.id) {
-    alert("برای ثبت تراکنش باید وارد حساب کاربری شوید");
-    return;
-  }
+  const addTransaction = async (transaction) => {
+    if (!currentUser?.id) {
+      alert("برای ثبت تراکنش باید وارد حساب کاربری شوید");
+      return;
+    }
 
-  const { data, error } = await insertTransaction(currentUser.id, {
-    ...transaction,
-    sourceType: "manual",
-    sourceId: null,
-  });
+    const { data, error } = await insertTransaction(currentUser.id, {
+      ...transaction,
+      sourceType: "manual",
+      sourceId: null,
+    });
 
-  if (error) {
-    console.error("Insert transaction error:", error);
-    alert("خطا در ثبت تراکنش");
-    return;
-  }
+    if (error) {
+      console.error("Insert transaction error:", error);
+      alert("خطا در ثبت تراکنش");
+      return;
+    }
 
-  setTransactions((prevTransactions) => [data, ...prevTransactions]);
-  setSelectedTransactionId(data.id);
+    setTransactions((prevTransactions) => [data, ...prevTransactions]);
+    setSelectedTransactionId(data.id);
   };
 
   const deleteTransaction = async (id) => {
-  const confirmDelete = window.confirm(
-    "آیا مطمئن هستید که میخواهید این تراکنش حذف شود؟"
-  );
+    const confirmDelete = window.confirm(
+      "آیا مطمئن هستید که میخواهید این تراکنش حذف شود؟"
+    );
 
-  if (!confirmDelete) {
-    return;
-  }
+    if (!confirmDelete) {
+      return;
+    }
 
-  if (!currentUser?.id) {
-    alert("برای حذف تراکنش باید وارد حساب کاربری شوید");
-    return;
-  }
+    if (!currentUser?.id) {
+      alert("برای حذف تراکنش باید وارد حساب کاربری شوید");
+      return;
+    }
 
-  const { error } = await deleteTransactionRecord(currentUser.id, id);
+    const { error } = await deleteTransactionRecord(currentUser.id, id);
 
-  if (error) {
-    console.error("Delete transaction error:", error);
-    alert("خطا در حذف تراکنش");
-    return;
-  }
+    if (error) {
+      console.error("Delete transaction error:", error);
+      alert("خطا در حذف تراکنش");
+      return;
+    }
 
-  setTransactions((prevTransactions) =>
-    prevTransactions.filter((transaction) => transaction.id !== id)
-  );
+    setTransactions((prevTransactions) =>
+      prevTransactions.filter((transaction) => transaction.id !== id)
+    );
 
-  if (String(selectedTransactionId) === String(id)) {
-    setSelectedTransactionId(null);
-  }
-};
+    if (String(selectedTransactionId) === String(id)) {
+      setSelectedTransactionId(null);
+    }
+  };
 
   const clearTransactions = async () => {
-  const confirmClear = window.confirm(
-    "آیا مطمئن هستید که میخواهید همه تراکنش‌ها حذف شوند؟"
-  );
+    const confirmClear = window.confirm(
+      "آیا مطمئن هستید که میخواهید همه تراکنش‌ها حذف شوند؟"
+    );
 
-  if (!confirmClear) {
-    return;
-  }
+    if (!confirmClear) {
+      return;
+    }
 
-  if (!currentUser?.id) {
-    alert("برای حذف تراکنش‌ها باید وارد حساب کاربری شوید");
-    return;
-  }
+    if (!currentUser?.id) {
+      alert("برای حذف تراکنش‌ها باید وارد حساب کاربری شوید");
+      return;
+    }
 
-  const { error } = await clearTransactionRecords(currentUser.id);
+    const { error } = await clearTransactionRecords(currentUser.id);
 
-  if (error) {
-    console.error("Clear transactions error:", error);
-    alert("خطا در حذف همه تراکنش‌ها");
-    return;
-  }
+    if (error) {
+      console.error("Clear transactions error:", error);
+      alert("خطا در حذف همه تراکنش‌ها");
+      return;
+    }
 
-  setTransactions([]);
-  setSelectedTransactionId(null);
-};
+    setTransactions([]);
+    setSelectedTransactionId(null);
+  };
 
- const addParty = async (party) => {
-  if (!currentUser?.id) {
-    alert("برای ثبت طرف حساب باید وارد حساب کاربری شوید");
-    return;
-  }
+  const addParty = async (party) => {
+    if (!currentUser?.id) {
+      alert("برای ثبت طرف حساب باید وارد حساب کاربری شوید");
+      return;
+    }
 
-  const { data, error } = await insertParty(currentUser.id, party);
+    const { data, error } = await insertParty(currentUser.id, party);
 
-  if (error) {
-    console.error("Insert party error:", error);
-    alert("خطا در ثبت طرف حساب");
-    return;
-  }
+    if (error) {
+      console.error("Insert party error:", error);
+      alert("خطا در ثبت طرف حساب");
+      return;
+    }
 
-  setParties((prevParties) => [data, ...prevParties]);
-};
+    setParties((prevParties) => [data, ...prevParties]);
+  };
 
-const deleteParty = async (id) => {
-  const confirmDelete = window.confirm(
-    "آیا مطمئن هستید که میخواهید این طرف حساب حذف شود؟"
-  );
+  const deleteParty = async (id) => {
+    const confirmDelete = window.confirm(
+      "آیا مطمئن هستید که میخواهید این طرف حساب حذف شود؟"
+    );
 
-  if (!confirmDelete) {
-    return;
-  }
+    if (!confirmDelete) {
+      return;
+    }
 
-  if (!currentUser?.id) {
-    alert("برای حذف طرف حساب باید وارد حساب کاربری شوید");
-    return;
-  }
+    if (!currentUser?.id) {
+      alert("برای حذف طرف حساب باید وارد حساب کاربری شوید");
+      return;
+    }
 
-  const { error } = await deletePartyRecord(currentUser.id, id);
+    const { error } = await deletePartyRecord(currentUser.id, id);
 
-  if (error) {
-    console.error("Delete party error:", error);
-    alert("خطا در حذف طرف حساب");
-    return;
-  }
+    if (error) {
+      console.error("Delete party error:", error);
+      alert("خطا در حذف طرف حساب");
+      return;
+    }
 
-  setParties((prevParties) =>
-    prevParties.filter((party) => party.id !== id)
-  );
-};
+    setParties((prevParties) =>
+      prevParties.filter((party) => party.id !== id)
+    );
+  };
 
-const updateParty = async (updatedParty) => {
-  if (!currentUser?.id) {
-    alert("برای ویرایش طرف حساب باید وارد حساب کاربری شوید");
-    return;
-  }
+  const updateParty = async (updatedParty) => {
+    if (!currentUser?.id) {
+      alert("برای ویرایش طرف حساب باید وارد حساب کاربری شوید");
+      return;
+    }
 
-  const { data, error } = await updatePartyRecord(
-    currentUser.id,
-    updatedParty
-  );
+    const { data, error } = await updatePartyRecord(
+      currentUser.id,
+      updatedParty
+    );
 
-  if (error) {
-    console.error("Update party error:", error);
-    alert("خطا در ویرایش طرف حساب");
-    return;
-  }
+    if (error) {
+      console.error("Update party error:", error);
+      alert("خطا در ویرایش طرف حساب");
+      return;
+    }
 
-  setParties((prevParties) =>
-    prevParties.map((party) =>
-      party.id === data.id ? data : party
-    )
-  );
-};
-  
-const addProduct = async (product) => {
-  if (!currentUser?.id) {
-    alert("برای ثبت کالا یا خدمت باید وارد حساب کاربری شوید");
-    return;
-  }
+    setParties((prevParties) =>
+      prevParties.map((party) => (party.id === data.id ? data : party))
+    );
+  };
 
-  const { data, error } = await insertProduct(currentUser.id, product);
+  const addProduct = async (product) => {
+    if (!currentUser?.id) {
+      alert("برای ثبت کالا یا خدمت باید وارد حساب کاربری شوید");
+      return;
+    }
 
-  if (error) {
-    console.error("Insert product error:", error);
-    alert("خطا در ثبت کالا یا خدمت");
-    return;
-  }
+    const { data, error } = await insertProduct(currentUser.id, product);
 
-  setProducts((prevProducts) => [data, ...prevProducts]);
-};
+    if (error) {
+      console.error("Insert product error:", error);
+      alert("خطا در ثبت کالا یا خدمت");
+      return;
+    }
 
-const deleteProduct = async (id) => {
-  const confirmDelete = window.confirm(
-    "آیا مطمئن هستید که میخواهید این کالا یا خدمت حذف شود؟"
-  );
+    setProducts((prevProducts) => [data, ...prevProducts]);
+  };
 
-  if (!confirmDelete) {
-    return;
-  }
+  const deleteProduct = async (id) => {
+    const confirmDelete = window.confirm(
+      "آیا مطمئن هستید که میخواهید این کالا یا خدمت حذف شود؟"
+    );
 
-  if (!currentUser?.id) {
-    alert("برای حذف کالا یا خدمت باید وارد حساب کاربری شوید");
-    return;
-  }
+    if (!confirmDelete) {
+      return;
+    }
 
-  const { error } = await deleteProductRecord(currentUser.id, id);
+    if (!currentUser?.id) {
+      alert("برای حذف کالا یا خدمت باید وارد حساب کاربری شوید");
+      return;
+    }
 
-  if (error) {
-    console.error("Delete product error:", error);
-    alert("خطا در حذف کالا یا خدمت");
-    return;
-  }
+    const { error } = await deleteProductRecord(currentUser.id, id);
 
-  setProducts((prevProducts) =>
-    prevProducts.filter((product) => product.id !== id)
-  );
-};
+    if (error) {
+      console.error("Delete product error:", error);
+      alert("خطا در حذف کالا یا خدمت");
+      return;
+    }
 
-const updateProduct = async (updatedProduct) => {
-  if (!currentUser?.id) {
-    alert("برای ویرایش کالا یا خدمت باید وارد حساب کاربری شوید");
-    return;
-  }
+    setProducts((prevProducts) =>
+      prevProducts.filter((product) => product.id !== id)
+    );
+  };
 
-  const { data, error } = await updateProductRecord(
-    currentUser.id,
-    updatedProduct
-  );
-  if (error) {
-    console.error("Update product error:", error);
-    alert("خطا در ویرایش کالا یا خدمت");
-    return;
-  }
+  const updateProduct = async (updatedProduct) => {
+    if (!currentUser?.id) {
+      alert("برای ویرایش کالا یا خدمت باید وارد حساب کاربری شوید");
+      return;
+    }
 
-  setProducts((prevProducts) =>
-    prevProducts.map((product) =>
-      product.id === data.id ? data : product
-    )
-  );
-};
+    const { data, error } = await updateProductRecord(
+      currentUser.id,
+      updatedProduct
+    );
 
- const createSalesInvoice = async (invoice) => {
-  if (!currentUser?.id) {
-    alert("برای ثبت فاکتور باید وارد حساب کاربری شوید");
-    return;
-  }
+    if (error) {
+      console.error("Update product error:", error);
+      alert("خطا در ویرایش کالا یا خدمت");
+      return;
+    }
 
-  const { data, error } = await insertSalesInvoice(currentUser.id, invoice);
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.id === data.id ? data : product
+      )
+    );
+  };
 
-  if (error) {
-    console.error("Insert sales invoice error:", error);
-    alert("خطا در ثبت فاکتور فروش");
-    return;
-  }
+  const createSalesInvoice = async (invoice) => {
+    if (!currentUser?.id) {
+      alert("برای ثبت فاکتور باید وارد حساب کاربری شوید");
+      return;
+    }
 
-  setSalesInvoices((prevInvoices) => [data, ...prevInvoices]);
+    const { data, error } = await insertSalesInvoice(currentUser.id, invoice);
 
-  setProducts((prevProducts) =>
-    prevProducts.map((product) => {
-      const invoiceRow = invoice.rows.find(
-        (row) => String(row.productId) === String(product.id)
-      );
+    if (error) {
+      console.error("Insert sales invoice error:", error);
+      alert("خطا در ثبت فاکتور فروش");
+      return;
+    }
 
-      if (!invoiceRow || product.type === "service") {
-        return product;
-      }
+    setSalesInvoices((prevInvoices) => [data, ...prevInvoices]);
 
-      return {
-        ...product,
-        stock: Math.max(
-          Number(product.stock) - Number(invoiceRow.quantity),
-          0
-        ),
-      };
-    })
-  );
+    setProducts((prevProducts) =>
+      prevProducts.map((product) => {
+        const invoiceRow = invoice.rows.find(
+          (row) => String(row.productId) === String(product.id)
+        );
 
-  const { data: transactionData, error: transactionError } =
-  await insertTransaction(currentUser.id, {
-    title: `فروش - ${data.invoiceNumber}`,
-    amount: Number(data.finalTotal),
-    type: "income",
-    date: data.createdAt,
-    sourceType: "sales_invoice",
-    sourceId: data.id,
-  });
+        if (!invoiceRow || product.type === "service") {
+          return product;
+        }
 
-if (transactionError) {
-  console.error("Insert sales transaction error:", transactionError);
-  alert("فاکتور ثبت شد، اما تراکنش مالی آن ثبت نشد");
-  return;
-}
+        return {
+          ...product,
+          stock: Math.max(
+            Number(product.stock) - Number(invoiceRow.quantity),
+            0
+          ),
+        };
+      })
+    );
 
-setTransactions((prevTransactions) => [transactionData, ...prevTransactions]);
-setSelectedTransactionId(transactionData.id);
+    const { data: transactionData, error: transactionError } =
+      await insertTransaction(currentUser.id, {
+        title: `فروش - ${data.invoiceNumber}`,
+        amount: Number(data.finalTotal),
+        type: "income",
+        date: data.createdAt,
+        sourceType: "sales_invoice",
+        sourceId: data.id,
+      });
 
-const goToDashboard = () => {
-  setActivePage("dashboard");
-};
+    if (transactionError) {
+      console.error("Insert sales transaction error:", transactionError);
+      alert("فاکتور ثبت شد، اما تراکنش مالی آن ثبت نشد");
+      return;
+    }
+
+    setTransactions((prevTransactions) => [
+      transactionData,
+      ...prevTransactions,
+    ]);
+    setSelectedTransactionId(transactionData.id);
+  };
+
+  const goToDashboard = () => {
+    setActivePage("dashboard");
+  };
+
   const renderPage = () => {
     if (activePage === "dashboard") {
       return (
@@ -591,10 +549,10 @@ const goToDashboard = () => {
     if (activePage === "products") {
       return (
         <ProductsPage
-         products={products}
-         onAddProduct={addProduct}
-         onDeleteProduct={deleteProduct}
-         onUpdateProduct={updateProduct}
+          products={products}
+          onAddProduct={addProduct}
+          onDeleteProduct={deleteProduct}
+          onUpdateProduct={updateProduct}
         />
       );
     }
@@ -602,11 +560,11 @@ const goToDashboard = () => {
     if (activePage === "customers") {
       return (
         <CustomersPage
-         parties={parties}
-         onAddParty={addParty}
-         onDeleteParty={deleteParty}
-         onUpdateParty={updateParty}
-       />
+          parties={parties}
+          onAddParty={addParty}
+          onDeleteParty={deleteParty}
+          onUpdateParty={updateParty}
+        />
       );
     }
 
@@ -625,24 +583,21 @@ const goToDashboard = () => {
     return null;
   };
 
-    if (!currentUser) {
+  if (!currentUser) {
     return <Auth onLogin={handleLogin} />;
   }
 
-      return (
+  return (
     <main className="app">
       <Header currentUser={currentUser} onLogout={handleLogout} />
 
       <div className="app-shell">
         <MainMenu activePage={activePage} onChangePage={setActivePage} />
 
-        <section className="app-content">
-          {renderPage()}
-        </section>
+        <section className="app-content">{renderPage()}</section>
       </div>
     </main>
   );
-}
 }
 
 export default App;
