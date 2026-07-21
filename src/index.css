@@ -3363,3 +3363,434 @@ tbody tr:hover {
     font-size: 12px;
   }
 }
+/* =========================================================
+   COMPLETE SIDEBAR + NAV + SUBMENU FIX
+   بدون تغییر رنگ کلی پروژه
+========================================================= */
+
+/* sidebar container */
+.main-menu,
+.sidebar,
+.side-menu,
+.navbar-side {
+  width: 260px;
+  min-width: 260px;
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  padding: 20px;
+  border-radius: var(--radius-lg, 24px);
+  background: var(--card, #ffffff);
+  border: 1px solid var(--line, #e5e7eb);
+  box-shadow: var(--shadow, 0 14px 35px rgba(15, 23, 42, 0.07));
+  direction: rtl;
+}
+
+/* title */
+.main-menu .menu-title,
+.sidebar .menu-title,
+.side-menu .menu-title {
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line, #e5e7eb);
+}
+
+.main-menu .menu-title h2,
+.sidebar .menu-title h2,
+.side-menu .menu-title h2 {
+  margin: 0;
+  color: var(--text, #111827);
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.main-menu .menu-title p,
+.sidebar .menu-title p,
+.side-menu .menu-title p {
+  margin: 6px 0 0;
+  color: var(--muted, #64748b);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* main list wrapper */
+.main-menu .menu-items,
+.main-menu .nav-items,
+.main-menu .sidebar-items,
+.sidebar .menu-items,
+.side-menu .menu-items {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* reset all lists */
+.main-menu ul,
+.main-menu ol,
+.sidebar ul,
+.sidebar ol,
+.side-menu ul,
+.side-menu ol {
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.main-menu li,
+.sidebar li,
+.side-menu li {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+/* all clickable nav items */
+.main-menu button,
+.main-menu a,
+.main-menu .menu-item,
+.main-menu .nav-item,
+.main-menu .sidebar-item,
+.main-menu li > button,
+.main-menu li > a,
+.main-menu li > div,
+.main-menu li > span,
+.sidebar button,
+.sidebar a,
+.sidebar .menu-item,
+.sidebar .nav-item,
+.side-menu button,
+.side-menu a,
+.side-menu .menu-item,
+.side-menu .nav-item {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 16px;
+  background: var(--field, #f9fafb);
+  color: #334155;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: right;
+  text-decoration: none;
+  direction: rtl;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+}
+
+/* hover and active */
+.main-menu button:hover,
+.main-menu a:hover,
+.main-menu .menu-item:hover,
+.main-menu .nav-item:hover,
+.main-menu .sidebar-item:hover,
+.main-menu li > button:hover,
+.main-menu li > a:hover,
+.main-menu li > div:hover,
+.main-menu li > span:hover,
+.sidebar button:hover,
+.sidebar a:hover,
+.sidebar .menu-item:hover,
+.sidebar .nav-item:hover,
+.side-menu button:hover,
+.side-menu a:hover,
+.side-menu .menu-item:hover,
+.side-menu .nav-item:hover,
+.main-menu button.active,
+.main-menu a.active,
+.main-menu .active,
+.main-menu .menu-item.active,
+.main-menu .nav-item.active,
+.main-menu .sidebar-item.active,
+.sidebar button.active,
+.sidebar a.active,
+.sidebar .active,
+.side-menu button.active,
+.side-menu a.active,
+.side-menu .active {
+  background: var(--brand-soft, #fff7ed);
+  color: var(--brand-dark, #c2410c);
+  border-color: #fdba74;
+  font-weight: 900;
+}
+
+/* submenu wrappers */
+.main-menu .submenu,
+.main-menu .sub-menu,
+.main-menu .menu-subitems,
+.main-menu .menu-children,
+.main-menu .children,
+.main-menu .dropdown-menu,
+.main-menu .collapse,
+.main-menu .nested-menu,
+.sidebar .submenu,
+.sidebar .sub-menu,
+.sidebar .menu-subitems,
+.side-menu .submenu,
+.side-menu .sub-menu,
+.side-menu .menu-subitems {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  padding: 8px 0 8px 10px;
+  border-right: 2px solid var(--line, #e5e7eb);
+}
+
+/* submenu clickable items */
+.main-menu .submenu button,
+.main-menu .submenu a,
+.main-menu .submenu div,
+.main-menu .submenu span,
+.main-menu .sub-menu button,
+.main-menu .sub-menu a,
+.main-menu .sub-menu div,
+.main-menu .sub-menu span,
+.main-menu .menu-subitems button,
+.main-menu .menu-subitems a,
+.main-menu .menu-subitems div,
+.main-menu .menu-subitems span,
+.main-menu .menu-children button,
+.main-menu .menu-children a,
+.main-menu .menu-children div,
+.main-menu .menu-children span,
+.main-menu .children button,
+.main-menu .children a,
+.main-menu .children div,
+.main-menu .children span,
+.main-menu .dropdown-menu button,
+.main-menu .dropdown-menu a,
+.main-menu .dropdown-menu div,
+.main-menu .dropdown-menu span,
+.main-menu .nested-menu button,
+.main-menu .nested-menu a,
+.main-menu .nested-menu div,
+.main-menu .nested-menu span {
+  width: 100%;
+  min-height: 40px;
+  padding: 10px 14px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 14px;
+  background: var(--field, #f9fafb);
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: right;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+/* submenu hover active */
+.main-menu .submenu button:hover,
+.main-menu .submenu a:hover,
+.main-menu .submenu div:hover,
+.main-menu .submenu span:hover,
+.main-menu .sub-menu button:hover,
+.main-menu .sub-menu a:hover,
+.main-menu .sub-menu div:hover,
+.main-menu .sub-menu span:hover,
+.main-menu .menu-subitems button:hover,
+.main-menu .menu-subitems a:hover,
+.main-menu .menu-subitems div:hover,
+.main-menu .menu-subitems span:hover,
+.main-menu .menu-children button:hover,
+.main-menu .menu-children a:hover,
+.main-menu .menu-children div:hover,
+.main-menu .menu-children span:hover,
+.main-menu .children button:hover,
+.main-menu .children a:hover,
+.main-menu .children div:hover,
+.main-menu .children span:hover,
+.main-menu .dropdown-menu button:hover,
+.main-menu .dropdown-menu a:hover,
+.main-menu .dropdown-menu div:hover,
+.main-menu .dropdown-menu span:hover,
+.main-menu .nested-menu button:hover,
+.main-menu .nested-menu a:hover,
+.main-menu .nested-menu div:hover,
+.main-menu .nested-menu span:hover,
+.main-menu .submenu .active,
+.main-menu .sub-menu .active,
+.main-menu .menu-subitems .active,
+.main-menu .menu-children .active,
+.main-menu .children .active,
+.main-menu .dropdown-menu .active,
+.main-menu .nested-menu .active {
+  background: var(--brand-soft, #fff7ed);
+  color: var(--brand-dark, #c2410c);
+  border-color: #fdba74;
+}
+
+/* group title */
+.main-menu .menu-group,
+.main-menu .nav-group,
+.main-menu .sidebar-group {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+}
+
+.main-menu .menu-group-title,
+.main-menu .nav-group-title,
+.main-menu .sidebar-group-title,
+.main-menu .section-title {
+  margin: 12px 2px 4px;
+  color: var(--muted, #64748b);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+/* details / summary accordion */
+.main-menu details,
+.sidebar details,
+.side-menu details {
+  width: 100%;
+  display: block;
+}
+
+.main-menu summary,
+.sidebar summary,
+.side-menu summary {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 16px;
+  background: var(--field, #f9fafb);
+  color: #334155;
+  font-size: 14px;
+  font-weight: 900;
+  direction: rtl;
+  cursor: pointer;
+  list-style: none;
+}
+
+.main-menu summary::-webkit-details-marker,
+.sidebar summary::-webkit-details-marker,
+.side-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.main-menu summary::after,
+.sidebar summary::after,
+.side-menu summary::after {
+  content: "▾";
+  color: var(--muted, #64748b);
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.main-menu details[open] summary,
+.sidebar details[open] summary,
+.side-menu details[open] summary {
+  background: var(--brand-soft, #fff7ed);
+  color: var(--brand-dark, #c2410c);
+  border-color: #fdba74;
+}
+
+.main-menu details[open] summary::after,
+.sidebar details[open] summary::after,
+.side-menu details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.main-menu details > div,
+.main-menu details > ul,
+.sidebar details > div,
+.sidebar details > ul,
+.side-menu details > div,
+.side-menu details > ul {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding-right: 10px;
+}
+
+/* badges / small text inside menu */
+.main-menu small,
+.main-menu .badge,
+.main-menu .count,
+.sidebar small,
+.sidebar .badge,
+.sidebar .count {
+  margin-right: auto;
+  color: var(--muted, #64748b);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* icons inside menu */
+.main-menu svg,
+.main-menu img,
+.sidebar svg,
+.sidebar img,
+.side-menu svg,
+.side-menu img {
+  flex-shrink: 0;
+}
+
+/* mobile */
+@media (max-width: 900px) {
+  .main-menu,
+  .sidebar,
+  .side-menu,
+  .navbar-side {
+    position: static;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .main-menu .menu-items,
+  .main-menu .nav-items,
+  .main-menu .sidebar-items,
+  .sidebar .menu-items,
+  .side-menu .menu-items {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .main-menu .submenu,
+  .main-menu .sub-menu,
+  .main-menu .menu-subitems,
+  .main-menu .menu-children,
+  .main-menu .children,
+  .main-menu .dropdown-menu,
+  .main-menu .collapse,
+  .main-menu .nested-menu {
+    padding: 8px 0;
+    border-right: 0;
+  }
+
+  .main-menu details > div,
+  .main-menu details > ul {
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .main-menu .menu-items,
+  .main-menu .nav-items,
+  .main-menu .sidebar-items,
+  .sidebar .menu-items,
+  .side-menu .menu-items {
+    grid-template-columns: 1fr;
+  }
+}
