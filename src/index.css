@@ -5272,3 +5272,435 @@ tbody tr:hover {
     font-size: 9px !important;
   }
 }
+/* =========================================================
+   FINAL Sales Invoice / فاکتور فروش Fix
+   فقط اصلاح چیدمان، فرم، جدول، خلاصه و لیست
+   بدون تغییر رنگ کلی پروژه
+========================================================= */
+
+.sales-card,
+.sales-page,
+.sales-invoice-page,
+.sales-invoice-card,
+section.card.sales-card {
+  width: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
+  direction: rtl !important;
+  min-width: 0;
+}
+
+/* Header */
+.sales-card .sales-header,
+.sales-page .sales-header,
+.sales-invoice-page .sales-header,
+.sales-invoice-header {
+  width: 100%;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid var(--line, #e5e7eb) !important;
+}
+
+.sales-card h2,
+.sales-card h3,
+.sales-header h2,
+.sales-header h3,
+.sales-invoice-header h2,
+.sales-invoice-header h3 {
+  margin: 0 0 6px !important;
+  color: var(--text, #111827) !important;
+  font-weight: 900 !important;
+  line-height: 1.5 !important;
+}
+
+.sales-card h2,
+.sales-header h2 {
+  font-size: 22px !important;
+}
+
+.sales-card h3,
+.sales-header h3 {
+  font-size: 18px !important;
+}
+
+.sales-card p,
+.sales-header p,
+.sales-invoice-header p {
+  margin: 0 !important;
+  color: var(--muted, #64748b) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.8 !important;
+}
+
+/* Main form */
+.sales-card form,
+.sales-form,
+.sales-invoice-form {
+  width: 100%;
+  display: grid !important;
+  gap: 18px !important;
+  direction: rtl !important;
+}
+
+/* Form grid fallback */
+.sales-card .sales-form-grid,
+.sales-card .invoice-form-grid,
+.sales-card .form-grid,
+.sales-form-grid,
+.sales-invoice-form-grid {
+  width: 100%;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  padding: 18px !important;
+  border: 1px solid var(--line, #e5e7eb) !important;
+  border-radius: 22px !important;
+  background: var(--card, #ffffff) !important;
+  box-shadow: var(--shadow-soft, 0 10px 24px rgba(15, 23, 42, 0.04)) !important;
+}
+
+.sales-card .sales-form-grid > div,
+.sales-card .invoice-form-grid > div,
+.sales-card .form-grid > div,
+.sales-form-grid > div,
+.sales-invoice-form-grid > div {
+  min-width: 0;
+  display: grid !important;
+  gap: 8px !important;
+}
+
+.sales-card .full,
+.sales-form-grid .full,
+.sales-invoice-form-grid .full {
+  grid-column: 1 / -1 !important;
+}
+
+/* Inputs */
+.sales-card label,
+.sales-form label,
+.sales-invoice-form label {
+  color: #374151 !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+
+.sales-card input,
+.sales-card select,
+.sales-card textarea,
+.sales-form input,
+.sales-form select,
+.sales-form textarea,
+.sales-invoice-form input,
+.sales-invoice-form select,
+.sales-invoice-form textarea {
+  width: 100% !important;
+  min-height: 46px !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: var(--radius-sm, 14px) !important;
+  background: var(--field, #f9fafb) !important;
+  color: var(--text, #111827) !important;
+  padding: 0 12px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  outline: none !important;
+  direction: rtl !important;
+}
+
+.sales-card textarea,
+.sales-form textarea,
+.sales-invoice-form textarea {
+  padding: 12px !important;
+  min-height: 90px !important;
+  resize: vertical !important;
+}
+
+.sales-card input:focus,
+.sales-card select:focus,
+.sales-card textarea:focus,
+.sales-form input:focus,
+.sales-form select:focus,
+.sales-form textarea:focus,
+.sales-invoice-form input:focus,
+.sales-invoice-form select:focus,
+.sales-invoice-form textarea:focus {
+  border-color: #fb923c !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.12) !important;
+}
+
+/* Add row area */
+.sales-add-row-box,
+.sales-add-row,
+.sales-row-action,
+.sales-card [class*="add-row"],
+.sales-card [class*="row-action"] {
+  align-self: end !important;
+  width: 100%;
+}
+
+.sales-add-row-box button,
+.sales-add-row button,
+.sales-row-action button,
+.sales-card [class*="add-row"] button,
+.sales-card [class*="row-action"] button {
+  width: 100% !important;
+  height: 46px !important;
+  border: 0 !important;
+  border-radius: var(--radius-sm, 14px) !important;
+  background: var(--dark, #111827) !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+/* Table wrappers */
+.sales-table-wrap,
+.sales-invoice-table-wrap,
+.sales-list-table-wrap,
+.sales-card [class*="table-wrap"] {
+  width: 100% !important;
+  overflow-x: auto !important;
+  border: 1px solid var(--line, #e5e7eb) !important;
+  border-radius: var(--radius-md, 18px) !important;
+  background: var(--card, #ffffff) !important;
+}
+
+/* Tables */
+.sales-table,
+.sales-invoice-table,
+.sales-list-table,
+.sales-card table {
+  width: 100% !important;
+  min-width: 860px !important;
+  border-collapse: collapse !important;
+  direction: rtl !important;
+}
+
+.sales-table th,
+.sales-table td,
+.sales-invoice-table th,
+.sales-invoice-table td,
+.sales-list-table th,
+.sales-list-table td,
+.sales-card table th,
+.sales-card table td {
+  padding: 13px 12px !important;
+  text-align: center !important;
+  border-bottom: 1px solid var(--line, #e5e7eb) !important;
+  font-size: 13px !important;
+  white-space: nowrap !important;
+  vertical-align: middle !important;
+}
+
+.sales-table th,
+.sales-invoice-table th,
+.sales-list-table th,
+.sales-card table th {
+  background: var(--field, #f9fafb) !important;
+  color: #334155 !important;
+  font-weight: 900 !important;
+}
+
+.sales-table td,
+.sales-invoice-table td,
+.sales-list-table td,
+.sales-card table td {
+  color: var(--text, #111827) !important;
+  font-weight: 700 !important;
+}
+
+.sales-table tbody tr:hover,
+.sales-invoice-table tbody tr:hover,
+.sales-list-table tbody tr:hover,
+.sales-card table tbody tr:hover {
+  background: var(--brand-soft, #fff7ed) !important;
+}
+
+/* Row delete buttons */
+.sales-delete-row-btn,
+.sales-remove-row-btn,
+.sales-row-delete-btn,
+.sales-card .delete-btn,
+.sales-card [class*="delete"],
+.sales-card [class*="remove"] {
+  border: 1px solid #fecaca !important;
+  border-radius: 12px !important;
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+.sales-delete-row-btn:hover,
+.sales-remove-row-btn:hover,
+.sales-row-delete-btn:hover,
+.sales-card .delete-btn:hover,
+.sales-card [class*="delete"]:hover,
+.sales-card [class*="remove"]:hover {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+/* Summary */
+.sales-summary-grid,
+.sales-invoice-summary-grid,
+.sales-card [class*="summary"] {
+  width: 100%;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.sales-summary-grid > div,
+.sales-invoice-summary-grid > div,
+.sales-card [class*="summary"] > div {
+  min-width: 0;
+  padding: 16px !important;
+  border: 1px solid var(--line, #e5e7eb) !important;
+  border-radius: var(--radius-md, 18px) !important;
+  background: var(--card, #ffffff) !important;
+  box-shadow: var(--shadow-soft, 0 10px 24px rgba(15, 23, 42, 0.04)) !important;
+}
+
+.sales-summary-grid span,
+.sales-invoice-summary-grid span,
+.sales-card [class*="summary"] span {
+  display: block !important;
+  margin-bottom: 8px !important;
+  color: var(--muted, #64748b) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+.sales-summary-grid strong,
+.sales-invoice-summary-grid strong,
+.sales-card [class*="summary"] strong {
+  color: var(--text, #111827) !important;
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  line-height: 1.6 !important;
+}
+
+.sales-summary-grid .final,
+.sales-invoice-summary-grid .final,
+.sales-card [class*="summary"] .final {
+  background: var(--brand-soft, #fff7ed) !important;
+  border-color: var(--brand-border, #fed7aa) !important;
+}
+
+.sales-summary-grid .final span,
+.sales-invoice-summary-grid .final span,
+.sales-card [class*="summary"] .final span {
+  color: var(--brand-dark, #c2410c) !important;
+}
+
+/* Submit button */
+.sales-submit-btn,
+.sales-invoice-submit-btn,
+.sales-card button[type="submit"],
+.sales-form button[type="submit"],
+.sales-invoice-form button[type="submit"] {
+  justify-self: start !important;
+  border: 0 !important;
+  border-radius: var(--radius-sm, 14px) !important;
+  background: var(--brand, #ea580c) !important;
+  color: #ffffff !important;
+  padding: 12px 24px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.2) !important;
+}
+
+.sales-submit-btn:hover,
+.sales-invoice-submit-btn:hover,
+.sales-card button[type="submit"]:hover,
+.sales-form button[type="submit"]:hover,
+.sales-invoice-form button[type="submit"]:hover {
+  background: var(--brand-dark, #c2410c) !important;
+}
+
+/* Sales invoice list */
+.sales-list,
+.sales-invoice-list,
+.sales-card [class*="list"] {
+  width: 100%;
+  display: grid !important;
+  gap: 14px !important;
+  padding-top: 6px !important;
+}
+
+.sales-list h3,
+.sales-invoice-list h3,
+.sales-card [class*="list"] h3 {
+  margin: 0 !important;
+  color: var(--text, #111827) !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+}
+
+/* Empty text */
+.sales-card .empty-text,
+.sales-card [class*="empty"] {
+  margin: 0 !important;
+  padding: 16px !important;
+  border-radius: 16px !important;
+  background: var(--field, #f9fafb) !important;
+  color: var(--muted, #64748b) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
+
+/* Prevent overflow */
+.sales-card *,
+.sales-page *,
+.sales-invoice-page * {
+  max-width: 100%;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .sales-card .sales-header,
+  .sales-page .sales-header,
+  .sales-invoice-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .sales-card .sales-form-grid,
+  .sales-card .invoice-form-grid,
+  .sales-card .form-grid,
+  .sales-form-grid,
+  .sales-invoice-form-grid,
+  .sales-summary-grid,
+  .sales-invoice-summary-grid,
+  .sales-card [class*="summary"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sales-submit-btn,
+  .sales-invoice-submit-btn,
+  .sales-card button[type="submit"],
+  .sales-form button[type="submit"],
+  .sales-invoice-form button[type="submit"] {
+    width: 100% !important;
+  }
+
+  .sales-table,
+  .sales-invoice-table,
+  .sales-list-table,
+  .sales-card table {
+    min-width: 760px !important;
+  }
+}
