@@ -871,6 +871,7 @@ function App() {
         <CustomerLedgerPage
           parties={parties}
           salesInvoices={salesInvoices}
+          purchaseInvoices={purchaseInvoices}
           partyPayments={partyPayments}
           onAddPartyPayment={addPartyPayment}
           onDeletePartyPayment={deletePartyPayment}
