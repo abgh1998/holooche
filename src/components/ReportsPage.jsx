@@ -1,306 +1,399 @@
 import { useMemo, useState } from "react";
+import * as XLSX from "xlsx";
 import { formatMoney } from "../utils/money";
 
-const getNumber = (value) => {
-  const number = Number(value);
+function ReportsPage({
+  transactions = [],
+  salesInvoices = [],
+  products = [],
+  parties = [],
+  purchaseInvoices = [],
+}) {
+  const [period, setPeriod] = useState("all");
 
-  if (Number.isNaN(number)) {
-    return 0;
-  }
+  const toNumber = (value) => Number(value || 0);
 
-  return number;
-};
+  const getDateValue = (value) => {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return date;
+  };
 
-const getDate = (value) => {
-  const date = new Date(value);
+  const isInSelectedPeriod = (dateValue) => {
+    if (period === "all") return true;
 
-  if (Number.isNaN(date.getTime())) {
-    return new Date();
-  }
+    const date = getDateValue(dateValue);
+    if (!date) return false;
 
-  return date;
-};
-
-const getStartOfWeek = (date) => {
-  const result = new Date(date);
-  const day = result.getDay();
-  const diff = day === 6 ? 0 : day + 1;
-
-  result.setDate(result.getDate() - diff);
-  result.setHours(0, 0, 0, 0);
-
-  return result;
-};
-
-const filterByPeriod = (items, period, dateField = "date") => {
-  if (period === "all") {
-    return items;
-  }
-
-  const now = new Date();
-
-  return items.filter((item) => {
-    const itemDate = getDate(item[dateField]);
+    const now = new Date();
 
     if (period === "today") {
-      return itemDate.toDateString() === now.toDateString();
+      return date.toDateString() === now.toDateString();
     }
 
     if (period === "week") {
-      const startOfWeek = getStartOfWeek(now);
-      return itemDate >= startOfWeek && itemDate <= now;
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - 7);
+      return date >= startOfWeek && date <= now;
     }
 
     if (period === "month") {
       return (
-        itemDate.getFullYear() === now.getFullYear() &&
-        itemDate.getMonth() === now.getMonth()
+        date.getFullYear() === now.getFullYear() &&
+        date.getMonth() === now.getMonth()
       );
     }
 
     if (period === "year") {
-      return itemDate.getFullYear() === now.getFullYear();
+      return date.getFullYear() === now.getFullYear();
     }
 
     return true;
-  });
-};
+  };
 
-const getPeriodLabel = (period) => {
-  if (period === "today") return "امروز";
-  if (period === "week") return "این هفته";
-  if (period === "month") return "این ماه";
-  if (period === "year") return "امسال";
-  return "کل دوره";
-};
+  const formatDate = (dateValue) => {
+    const date = getDateValue(dateValue);
+    if (!date) return "-";
+    return date.toLocaleDateString("fa-IR");
+  };
 
-function ReportsPage({
-  transactions,
-  parties,
-  products,
-  salesInvoices,
-  onBack,
-}) {
-  const [period, setPeriod] = useState("all");
+  const formatDateTime = (dateValue) => {
+    const date = getDateValue(dateValue);
+    if (!date) return "-";
+    return date.toLocaleString("fa-IR");
+  };
 
   const filteredTransactions = useMemo(() => {
-    return filterByPeriod(transactions, period, "date");
+    return transactions.filter((item) =>
+      isInSelectedPeriod(item.date || item.transactionDate || item.createdAt)
+    );
   }, [transactions, period]);
 
-  const filteredInvoices = useMemo(() => {
-    return filterByPeriod(salesInvoices, period, "createdAt");
+  const filteredSalesInvoices = useMemo(() => {
+    return salesInvoices.filter((item) => isInSelectedPeriod(item.createdAt));
   }, [salesInvoices, period]);
 
-  const incomeTotal = useMemo(() => {
-    return filteredTransactions
-      .filter((transaction) => transaction.type === "income")
-      .reduce((sum, transaction) => sum + getNumber(transaction.amount), 0);
-  }, [filteredTransactions]);
+  const filteredPurchaseInvoices = useMemo(() => {
+    return purchaseInvoices.filter((item) => isInSelectedPeriod(item.createdAt));
+  }, [purchaseInvoices, period]);
 
-  const expenseTotal = useMemo(() => {
-    return filteredTransactions
-      .filter((transaction) => transaction.type === "expense")
-      .reduce((sum, transaction) => sum + getNumber(transaction.amount), 0);
-  }, [filteredTransactions]);
+  const incomeTotal = filteredTransactions
+    .filter((item) => item.type === "income")
+    .reduce((sum, item) => sum + toNumber(item.amount), 0);
 
-  const balance = incomeTotal - expenseTotal;
+  const expenseTotal = filteredTransactions
+    .filter((item) => item.type === "expense")
+    .reduce((sum, item) => sum + toNumber(item.amount), 0);
 
-  const salesTotal = useMemo(() => {
-    return filteredInvoices.reduce(
-      (sum, invoice) => sum + getNumber(invoice.finalTotal),
+  const cashBalance = incomeTotal - expenseTotal;
+
+  const salesTotal = filteredSalesInvoices.reduce(
+    (sum, invoice) => sum + toNumber(invoice.finalTotal),
+    0
+  );
+
+  const salesRowsCount = filteredSalesInvoices.reduce(
+    (sum, invoice) =>
+      sum +
+      (invoice.rows || []).reduce(
+        (rowSum, row) => rowSum + toNumber(row.quantity),
+        0
+      ),
+    0
+  );
+
+  const inventoryValue = products
+    .filter((product) => product.type === "product")
+    .reduce(
+      (sum, product) =>
+        sum + toNumber(product.stock) * toNumber(product.buyPrice),
       0
     );
-  }, [filteredInvoices]);
 
-  const invoiceItemsCount = useMemo(() => {
-    return filteredInvoices.reduce((sum, invoice) => {
-      const rows = Array.isArray(invoice.rows) ? invoice.rows : [];
-
-      return (
-        sum +
-        rows.reduce((rowSum, row) => rowSum + getNumber(row.quantity), 0)
-      );
-    }, 0);
-  }, [filteredInvoices]);
-
-  const inventoryValue = useMemo(() => {
-    return products.reduce((sum, product) => {
-      if (product.type === "service") {
-        return sum;
-      }
-
-      return (
-        sum +
-        getNumber(product.stock) *
-          getNumber(product.buyPrice || product.purchasePrice)
-      );
-    }, 0);
-  }, [products]);
-
-  const lowStockProducts = useMemo(() => {
-    return products.filter((product) => {
-      if (product.type === "service") {
-        return false;
-      }
-
-      return getNumber(product.stock) <= getNumber(product.minStock);
-    });
-  }, [products]);
-
-  const debtors = useMemo(() => {
-    return parties.filter((party) => party.balanceType === "debtor");
-  }, [parties]);
-
-  const creditors = useMemo(() => {
-    return parties.filter((party) => party.balanceType === "creditor");
-  }, [parties]);
+  const lowStockProducts = products.filter(
+    (product) =>
+      product.type === "product" &&
+      toNumber(product.stock) <= toNumber(product.minStock)
+  );
 
   const topSellingProducts = useMemo(() => {
-    const productMap = {};
+    const map = new Map();
 
-    filteredInvoices.forEach((invoice) => {
-      const rows = Array.isArray(invoice.rows) ? invoice.rows : [];
+    filteredSalesInvoices.forEach((invoice) => {
+      (invoice.rows || []).forEach((row) => {
+        const key = row.productId || row.name || "بدون نام";
 
-      rows.forEach((row) => {
-        const productId = String(row.productId);
-        const quantity = getNumber(row.quantity);
-        const rowTotal = getNumber(row.total);
+        const previous = map.get(key) || {
+          name: row.name || "بدون نام",
+          quantity: 0,
+          amount: 0,
+        };
 
-        if (!productMap[productId]) {
-          productMap[productId] = {
-            productId,
-            name: row.productName || "بدون نام",
-            quantity: 0,
-            total: 0,
-          };
-        }
+        previous.quantity += toNumber(row.quantity);
+        previous.amount += toNumber(row.rowTotal);
 
-        productMap[productId].quantity += quantity;
-        productMap[productId].total += rowTotal;
+        map.set(key, previous);
       });
     });
 
-    return Object.values(productMap)
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 5);
-  }, [filteredInvoices]);
+    return Array.from(map.values())
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 10);
+  }, [filteredSalesInvoices]);
 
   const topExpenses = useMemo(() => {
     return filteredTransactions
-      .filter((transaction) => transaction.type === "expense")
-      .sort((a, b) => getNumber(b.amount) - getNumber(a.amount))
-      .slice(0, 5);
+      .filter((item) => item.type === "expense")
+      .map((item) => ({
+        title: item.title || "-",
+        amount: toNumber(item.amount),
+        date: item.date || item.transactionDate || item.createdAt,
+      }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 10);
   }, [filteredTransactions]);
 
-  const downloadExcelReport = () => {
-    const tableStyle =
-      "border:1px solid #999;padding:8px;text-align:right;direction:rtl;";
-    const headerStyle =
-      "border:1px solid #999;padding:8px;text-align:right;background:#f3f4f6;font-weight:bold;direction:rtl;";
+  const debtorParties = parties.filter(
+    (party) => party.balanceStatus === "debtor"
+  );
 
-    const createTable = (title, headers, rows) => {
-      const headerCells = headers
-        .map((header) => `<th style="${headerStyle}">${header}</th>`)
-        .join("");
+  const creditorParties = parties.filter(
+    (party) => party.balanceStatus === "creditor"
+  );
 
-      const bodyRows = rows
-        .map((row) => {
-          const cells = row
-            .map((cell) => `<td style="${tableStyle}">${cell}</td>`)
-            .join("");
+  const addSheet = (workbook, sheetName, rows) => {
+    const safeRows =
+      rows.length > 0
+        ? rows
+        : [
+            {
+              توضیح: "داده‌ای برای نمایش وجود ندارد",
+            },
+          ];
 
-          return `<tr>${cells}</tr>`;
-        })
-        .join("");
+    const worksheet = XLSX.utils.json_to_sheet(safeRows);
 
-      return `
-        <h2>${title}</h2>
-        <table style="border-collapse:collapse;width:100%;direction:rtl;font-family:Tahoma;">
-          <thead>
-            <tr>${headerCells}</tr>
-          </thead>
-          <tbody>
-            ${bodyRows}
-          </tbody>
-        </table>
-        <br />
-      `;
-    };
+    const headers = Object.keys(safeRows[0] || {});
+    worksheet["!cols"] = headers.map((header) => ({
+      wch: Math.max(String(header).length + 6, 18),
+    }));
 
-    const summaryRows = [
-      ["دوره گزارش", getPeriodLabel(period)],
-      ["درآمد", formatMoney(incomeTotal)],
-      ["هزینه", formatMoney(expenseTotal)],
-      ["مانده", formatMoney(balance)],
-      ["فروش", formatMoney(salesTotal)],
-      ["تعداد فاکتور", filteredInvoices.length],
-      ["تعداد کالا / خدمت", products.length],
-      ["تعداد طرف حساب", parties.length],
-    ];
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName.slice(0, 31));
+  };
 
-    const invoiceRows = filteredInvoices.map((invoice) => [
-      invoice.invoiceNumber || "-",
-      invoice.customerName || "-",
-      formatMoney(invoice.finalTotal || 0),
-      new Date(invoice.createdAt).toLocaleDateString("fa-IR"),
+  const exportExcel = () => {
+    const workbook = XLSX.utils.book_new();
+
+    const reportTitle =
+      period === "all"
+        ? "کل دوره"
+        : period === "today"
+        ? "امروز"
+        : period === "week"
+        ? "این هفته"
+        : period === "month"
+        ? "این ماه"
+        : "امسال";
+
+    addSheet(workbook, "خلاصه مدیریتی", [
+      {
+        دوره: reportTitle,
+        درآمد_عدد: incomeTotal,
+        درآمد_نمایشی: formatMoney(incomeTotal),
+        هزینه_عدد: expenseTotal,
+        هزینه_نمایشی: formatMoney(expenseTotal),
+        مانده_عدد: cashBalance,
+        مانده_نمایشی: formatMoney(cashBalance),
+        فروش_عدد: salesTotal,
+        فروش_نمایشی: formatMoney(salesTotal),
+        تعداد_فاکتور_فروش: filteredSalesInvoices.length,
+        تعداد_اقلام_فروخته_شده: salesRowsCount,
+        تعداد_کالا_و_خدمت: products.length,
+        تعداد_طرف_حساب: parties.length,
+        تاریخ_خروجی: new Date().toLocaleString("fa-IR"),
+      },
     ]);
 
-    const transactionRows = filteredTransactions.map((transaction) => [
-      transaction.title || "-",
-      transaction.type === "income" ? "درآمد" : "هزینه",
-      formatMoney(transaction.amount || 0),
-      new Date(transaction.date).toLocaleDateString("fa-IR"),
-    ]);
+    addSheet(
+      workbook,
+      "گزارش فروش",
+      filteredSalesInvoices.map((invoice) => ({
+        شماره_فاکتور: invoice.invoiceNumber || "-",
+        مشتری: invoice.customerName || "-",
+        جمع_قبل_از_تخفیف_عدد: toNumber(invoice.subtotal),
+        جمع_قبل_از_تخفیف_نمایشی: formatMoney(invoice.subtotal),
+        تخفیف_عدد: toNumber(invoice.totalDiscount),
+        تخفیف_نمایشی: formatMoney(invoice.totalDiscount),
+        مبلغ_نهایی_عدد: toNumber(invoice.finalTotal),
+        مبلغ_نهایی_نمایشی: formatMoney(invoice.finalTotal),
+        وضعیت_پرداخت: invoice.paymentStatus || "-",
+        پرداخت_شده_عدد: toNumber(invoice.paidAmount),
+        پرداخت_شده_نمایشی: formatMoney(invoice.paidAmount),
+        مانده_عدد: toNumber(invoice.remainingAmount),
+        مانده_نمایشی: formatMoney(invoice.remainingAmount),
+        تعداد_اقلام: invoice.rows?.length || 0,
+        تاریخ: formatDateTime(invoice.createdAt),
+        توضیحات: invoice.note || "",
+      }))
+    );
 
-    const productRows = products.map((product) => [
-      product.code || "-",
-      product.name || "-",
-      product.type === "service" ? "خدمت" : "کالا",
-      product.stock ?? "-",
-      formatMoney(product.salePrice || 0),
-    ]);
+    addSheet(
+      workbook,
+      "اقلام فاکتور فروش",
+      filteredSalesInvoices.flatMap((invoice) =>
+        (invoice.rows || []).map((row) => ({
+          شماره_فاکتور: invoice.invoiceNumber || "-",
+          مشتری: invoice.customerName || "-",
+          کد_کالا: row.code || "",
+          نام_کالا_یا_خدمت: row.name || "-",
+          نوع: row.type === "service" ? "خدمت" : "کالا",
+          واحد: row.unit || "",
+          تعداد_عدد: toNumber(row.quantity),
+          قیمت_واحد_عدد: toNumber(row.salePrice),
+          قیمت_واحد_نمایشی: formatMoney(row.salePrice),
+          تخفیف_عدد: toNumber(row.discount),
+          تخفیف_نمایشی: formatMoney(row.discount),
+          جمع_ردیف_عدد: toNumber(row.rowTotal),
+          جمع_ردیف_نمایشی: formatMoney(row.rowTotal),
+          تاریخ_فاکتور: formatDateTime(invoice.createdAt),
+        }))
+      )
+    );
 
-    const partyRows = parties.map((party) => [
-      party.name || "-",
-      party.type || "-",
-      party.phone || "-",
-      party.balanceType || "-",
-      formatMoney(party.openingBalance || 0),
-    ]);
+    addSheet(
+      workbook,
+      "گزارش صندوق",
+      filteredTransactions.map((item) => ({
+        عنوان: item.title || "-",
+        نوع: item.type === "income" ? "درآمد" : "هزینه",
+        مبلغ_عدد: toNumber(item.amount),
+        مبلغ_نمایشی: formatMoney(item.amount),
+        تاریخ: formatDateTime(item.date || item.transactionDate || item.createdAt),
+        منبع: item.sourceType || "manual",
+        شناسه_منبع: item.sourceId || "",
+      }))
+    );
 
-    const html = `
-      <html>
-        <head>
-          <meta charset="UTF-8" />
-        </head>
-        <body style="direction:rtl;font-family:Tahoma;">
-          <h1>گزارش مالی Holooche</h1>
-          ${createTable("خلاصه گزارش", ["عنوان", "مقدار"], summaryRows)}
-          ${createTable("فاکتورهای فروش", ["شماره فاکتور", "مشتری", "مبلغ", "تاریخ"], invoiceRows)}
-          ${createTable("تراکنش‌ها", ["عنوان", "نوع", "مبلغ", "تاریخ"], transactionRows)}
-          ${createTable("کالاها و خدمات", ["کد", "نام", "نوع", "موجودی", "قیمت فروش"], productRows)}
-          ${createTable("طرف حساب‌ها", ["نام", "نوع", "موبایل", "وضعیت", "مانده اول دوره"], partyRows)}
-        </body>
-      </html>
-    `;
+    addSheet(
+      workbook,
+      "موجودی کالا",
+      products.map((product) => ({
+        کد: product.code || "",
+        نام: product.name || "-",
+        نوع: product.type === "service" ? "خدمت" : "کالا",
+        واحد: product.unit || "",
+        دسته_بندی: product.category || "",
+        قیمت_خرید_عدد: toNumber(product.buyPrice),
+        قیمت_خرید_نمایشی: formatMoney(product.buyPrice),
+        قیمت_فروش_عدد: toNumber(product.salePrice),
+        قیمت_فروش_نمایشی: formatMoney(product.salePrice),
+        سود_واحد_عدد: toNumber(product.salePrice) - toNumber(product.buyPrice),
+        سود_واحد_نمایشی: formatMoney(
+          toNumber(product.salePrice) - toNumber(product.buyPrice)
+        ),
+        موجودی_عدد: toNumber(product.stock),
+        حداقل_موجودی_عدد: toNumber(product.minStock),
+        وضعیت_موجودی:
+          product.type === "product" &&
+          toNumber(product.stock) <= toNumber(product.minStock)
+            ? "کمبود موجودی"
+            : "عادی",
+        ارزش_موجودی_عدد:
+          product.type === "product"
+            ? toNumber(product.stock) * toNumber(product.buyPrice)
+            : 0,
+        ارزش_موجودی_نمایشی:
+          product.type === "product"
+            ? formatMoney(toNumber(product.stock) * toNumber(product.buyPrice))
+            : formatMoney(0),
+      }))
+    );
 
-    const blob = new Blob([html], {
-      type: "application/vnd.ms-excel;charset=utf-8;",
-    });
+    addSheet(
+      workbook,
+      "طرف حساب‌ها",
+      parties.map((party) => ({
+        نام: party.name || "-",
+        نوع:
+          party.type === "customer"
+            ? "مشتری"
+            : party.type === "supplier"
+            ? "تامین کننده"
+            : "شخص",
+        تلفن: party.phone || "",
+        آدرس: party.address || "",
+        مانده_اولیه_عدد: toNumber(party.openingBalance),
+        مانده_اولیه_نمایشی: formatMoney(party.openingBalance),
+        وضعیت_مانده:
+          party.balanceStatus === "debtor"
+            ? "بدهکار"
+            : party.balanceStatus === "creditor"
+            ? "بستانکار"
+            : "بدون مانده",
+        تاریخ_ایجاد: formatDateTime(party.createdAt),
+      }))
+    );
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    addSheet(
+      workbook,
+      "پرفروش‌ترین‌ها",
+      topSellingProducts.map((item, index) => ({
+        ردیف: index + 1,
+        نام: item.name,
+        تعداد_فروش_عدد: item.quantity,
+        مبلغ_فروش_عدد: item.amount,
+        مبلغ_فروش_نمایشی: formatMoney(item.amount),
+      }))
+    );
 
-    link.href = url;
-    link.download = "holooche-report.xls";
-    link.click();
+    addSheet(
+      workbook,
+      "بیشترین هزینه‌ها",
+      topExpenses.map((item, index) => ({
+        ردیف: index + 1,
+        عنوان: item.title,
+        مبلغ_عدد: item.amount,
+        مبلغ_نمایشی: formatMoney(item.amount),
+        تاریخ: formatDateTime(item.date),
+      }))
+    );
 
-    URL.revokeObjectURL(url);
+    addSheet(
+      workbook,
+      "فاکتورهای خرید",
+      filteredPurchaseInvoices.map((invoice) => ({
+        شماره_فاکتور: invoice.invoiceNumber || "-",
+        تامین_کننده: invoice.supplierName || "-",
+        جمع_قبل_از_تخفیف_عدد: toNumber(invoice.subtotal),
+        جمع_قبل_از_تخفیف_نمایشی: formatMoney(invoice.subtotal),
+        تخفیف_عدد: toNumber(invoice.totalDiscount),
+        تخفیف_نمایشی: formatMoney(invoice.totalDiscount),
+        مبلغ_نهایی_عدد: toNumber(invoice.finalTotal),
+        مبلغ_نهایی_نمایشی: formatMoney(invoice.finalTotal),
+        وضعیت_پرداخت: invoice.paymentStatus || "-",
+        پرداخت_شده_عدد: toNumber(invoice.paidAmount),
+        پرداخت_شده_نمایشی: formatMoney(invoice.paidAmount),
+        مانده_عدد: toNumber(invoice.remainingAmount),
+        مانده_نمایشی: formatMoney(invoice.remainingAmount),
+        تعداد_اقلام: invoice.rows?.length || 0,
+        تاریخ: formatDateTime(invoice.createdAt),
+        توضیحات: invoice.note || "",
+      }))
+    );
+
+    XLSX.writeFile(
+      workbook,
+      `Holooche-Report-${new Date().toISOString().slice(0, 10)}.xlsx`
+    );
+  };
+
+  const printReport = () => {
+    window.print();
   };
 
   return (
     <section className="reports-page">
-    
       <div className="reports-header">
         <div>
           <p className="section-label">گزارش‌ها</p>
@@ -312,10 +405,7 @@ function ReportsPage({
         </div>
 
         <div className="reports-actions">
-          <select
-            value={period}
-            onChange={(event) => setPeriod(event.target.value)}
-          >
+          <select value={period} onChange={(e) => setPeriod(e.target.value)}>
             <option value="all">کل دوره</option>
             <option value="today">امروز</option>
             <option value="week">این هفته</option>
@@ -323,11 +413,11 @@ function ReportsPage({
             <option value="year">امسال</option>
           </select>
 
-          <button type="button" onClick={downloadExcelReport}>
+          <button type="button" onClick={exportExcel}>
             خروجی Excel
           </button>
 
-          <button type="button" onClick={() => window.print()}>
+          <button type="button" onClick={printReport}>
             چاپ گزارش
           </button>
         </div>
@@ -346,7 +436,7 @@ function ReportsPage({
 
         <article className="report-kpi-card">
           <span>مانده</span>
-          <strong>{formatMoney(balance)}</strong>
+          <strong>{formatMoney(cashBalance)}</strong>
         </article>
 
         <article className="report-kpi-card">
@@ -358,17 +448,14 @@ function ReportsPage({
       <div className="reports-grid">
         <article className="report-box">
           <h3>گزارش فروش</h3>
-
           <div className="report-row">
             <span>تعداد فاکتور</span>
-            <strong>{filteredInvoices.length}</strong>
+            <strong>{filteredSalesInvoices.length}</strong>
           </div>
-
           <div className="report-row">
             <span>تعداد اقلام فروخته شده</span>
-            <strong>{invoiceItemsCount}</strong>
+            <strong>{salesRowsCount}</strong>
           </div>
-
           <div className="report-row">
             <span>مبلغ کل فروش</span>
             <strong>{formatMoney(salesTotal)}</strong>
@@ -377,36 +464,30 @@ function ReportsPage({
 
         <article className="report-box">
           <h3>گزارش صندوق</h3>
-
           <div className="report-row">
             <span>ورودی صندوق</span>
             <strong>{formatMoney(incomeTotal)}</strong>
           </div>
-
           <div className="report-row">
             <span>خروجی صندوق</span>
             <strong>{formatMoney(expenseTotal)}</strong>
           </div>
-
           <div className="report-row">
             <span>مانده صندوق</span>
-            <strong>{formatMoney(balance)}</strong>
+            <strong>{formatMoney(cashBalance)}</strong>
           </div>
         </article>
 
         <article className="report-box">
           <h3>گزارش موجودی</h3>
-
           <div className="report-row">
             <span>تعداد کالا / خدمت</span>
             <strong>{products.length}</strong>
           </div>
-
           <div className="report-row">
             <span>کالاهای کم موجودی</span>
             <strong>{lowStockProducts.length}</strong>
           </div>
-
           <div className="report-row">
             <span>ارزش تقریبی موجودی</span>
             <strong>{formatMoney(inventoryValue)}</strong>
@@ -415,20 +496,17 @@ function ReportsPage({
 
         <article className="report-box">
           <h3>طرف حساب‌ها</h3>
-
           <div className="report-row">
             <span>تعداد طرف حساب</span>
             <strong>{parties.length}</strong>
           </div>
-
           <div className="report-row">
             <span>بدهکاران</span>
-            <strong>{debtors.length}</strong>
+            <strong>{debtorParties.length}</strong>
           </div>
-
           <div className="report-row">
             <span>بستانکاران</span>
-            <strong>{creditors.length}</strong>
+            <strong>{creditorParties.length}</strong>
           </div>
         </article>
       </div>
@@ -436,14 +514,16 @@ function ReportsPage({
       <div className="reports-grid">
         <article className="report-box">
           <h3>پرفروش‌ترین کالاها / خدمات</h3>
-
           {topSellingProducts.length === 0 ? (
-            <p className="empty-text">هنوز فروشی ثبت نشده است.</p>
+            <div className="report-row">
+              <span>داده‌ای وجود ندارد</span>
+              <strong>{formatMoney(0)}</strong>
+            </div>
           ) : (
             topSellingProducts.map((item) => (
-              <div className="report-row" key={item.productId}>
+              <div className="report-row" key={item.name}>
                 <span>{item.name}</span>
-                <strong>{formatMoney(item.total)}</strong>
+                <strong>{formatMoney(item.amount)}</strong>
               </div>
             ))
           )}
@@ -451,14 +531,16 @@ function ReportsPage({
 
         <article className="report-box">
           <h3>بیشترین هزینه‌ها</h3>
-
           {topExpenses.length === 0 ? (
-            <p className="empty-text">هنوز هزینه‌ای ثبت نشده است.</p>
+            <div className="report-row">
+              <span>داده‌ای وجود ندارد</span>
+              <strong>{formatMoney(0)}</strong>
+            </div>
           ) : (
-            topExpenses.map((transaction) => (
-              <div className="report-row" key={transaction.id}>
-                <span>{transaction.title}</span>
-                <strong>{formatMoney(transaction.amount)}</strong>
+            topExpenses.map((item) => (
+              <div className="report-row" key={`${item.title}-${item.amount}`}>
+                <span>{item.title}</span>
+                <strong>{formatMoney(item.amount)}</strong>
               </div>
             ))
           )}
@@ -468,35 +550,29 @@ function ReportsPage({
       <div className="report-table-card">
         <h3>فاکتورهای فروش</h3>
 
-        {filteredInvoices.length === 0 ? (
-          <p className="empty-text">فاکتوری برای این دوره ثبت نشده است.</p>
-        ) : (
-          <div className="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>شماره فاکتور</th>
-                  <th>مشتری</th>
-                  <th>مبلغ نهایی</th>
-                  <th>تاریخ</th>
-                </tr>
-              </thead>
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>شماره فاکتور</th>
+                <th>مشتری</th>
+                <th>مبلغ نهایی</th>
+                <th>تاریخ</th>
+              </tr>
+            </thead>
 
-              <tbody>
-                {filteredInvoices.map((invoice) => (
-                  <tr key={invoice.id}>
-                    <td>{invoice.invoiceNumber}</td>
-                    <td>{invoice.customerName || "-"}</td>
-                    <td>{formatMoney(invoice.finalTotal || 0)}</td>
-                    <td>
-                      {new Date(invoice.createdAt).toLocaleDateString("fa-IR")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+            <tbody>
+              {filteredSalesInvoices.map((invoice) => (
+                <tr key={invoice.id}>
+                  <td>{invoice.invoiceNumber}</td>
+                  <td>{invoice.customerName}</td>
+                  <td>{formatMoney(invoice.finalTotal)}</td>
+                  <td>{formatDate(invoice.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   );
