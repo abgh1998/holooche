@@ -2556,3 +2556,810 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   Holooche Global UI Fix
+   هماهنگ‌سازی همه کامپوننت‌ها بدون تغییر رنگ جداگانه هر بخش
+========================================================= */
+
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #64748b;
+  --line: #e5e7eb;
+  --field: #f9fafb;
+  --brand-soft: #fff7ed;
+  --brand-border: #fed7aa;
+  --brand: #ea580c;
+  --brand-dark: #c2410c;
+  --dark: #111827;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --shadow: 0 14px 35px rgba(15, 23, 42, 0.07);
+  --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.04);
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-sm: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  direction: rtl;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  width: 100%;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+}
+
+.app-content {
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  gap: 18px;
+}
+
+.card {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  direction: rtl;
+}
+
+/* Header */
+.header,
+.app-header {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.header,
+.app-header,
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.header h1,
+.app-header h1 {
+  margin: 0;
+  color: var(--text);
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.header p,
+.app-header p,
+.header span,
+.app-header span {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.header button,
+.app-header button {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--field);
+  color: #334155;
+  padding: 10px 16px;
+  font-weight: 900;
+}
+
+/* Sidebar / Main Menu */
+.main-menu {
+  width: 260px;
+  min-width: 260px;
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  direction: rtl;
+}
+
+.menu-title {
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.menu-title h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.menu-title p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.menu-items button {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--field);
+  color: #334155;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: right;
+  transition: all 0.2s ease;
+}
+
+.menu-items button:hover,
+.menu-items button.active {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  border-color: #fdba74;
+}
+
+/* Generic titles */
+.card h2,
+.card h3 {
+  margin-top: 0;
+  color: var(--text);
+  font-weight: 900;
+}
+
+.card h2 {
+  font-size: 22px;
+}
+
+.card h3 {
+  font-size: 18px;
+}
+
+.card p {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* Forms - all project */
+form {
+  direction: rtl;
+}
+
+label {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius-sm);
+  background: var(--field);
+  color: var(--text);
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  direction: rtl;
+}
+
+textarea {
+  padding: 12px;
+  min-height: 90px;
+  resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #fb923c;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.12);
+}
+
+button[type="submit"],
+.primary-btn,
+.submit-btn,
+.add-btn,
+.purchase-submit-btn {
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--brand);
+  color: #ffffff;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 900;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.2);
+}
+
+button[type="submit"]:hover,
+.primary-btn:hover,
+.submit-btn:hover,
+.add-btn:hover,
+.purchase-submit-btn:hover {
+  background: var(--brand-dark);
+}
+
+.secondary-btn,
+.back-btn,
+.ledger-back-btn {
+  border: 1px solid var(--line);
+  background: var(--field);
+  color: #334155;
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-weight: 900;
+}
+
+.delete-btn,
+.remove-btn,
+.ledger-delete-btn,
+.purchase-delete-row-btn {
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+/* Tables - all project */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  direction: rtl;
+}
+
+.table-wrap,
+.ledger-table-wrap,
+.purchase-table-wrap,
+.invoice-table-wrap,
+.products-table-wrap,
+.customers-table-wrap,
+.reports-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card);
+}
+
+th,
+td {
+  padding: 13px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+th {
+  background: var(--field);
+  color: #334155;
+  font-weight: 900;
+}
+
+td {
+  color: var(--text);
+  font-weight: 700;
+}
+
+tbody tr:hover {
+  background: var(--brand-soft);
+}
+
+/* Dashboard cards / summary */
+.balance-card,
+.summary-card,
+.chart-card,
+.report-card,
+.management-card {
+  display: grid;
+  gap: 16px;
+}
+
+.balance-card strong,
+.summary-card strong,
+.report-card strong,
+.management-card strong {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.summary,
+.summary-grid,
+.report-grid,
+.management-grid,
+.ledger-summary-grid,
+.purchase-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.summary > div,
+.summary-grid > div,
+.report-grid > div,
+.management-grid > div,
+.ledger-summary-grid > div,
+.purchase-summary-grid > div {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  box-shadow: var(--shadow-soft);
+}
+
+.summary span,
+.summary-grid span,
+.report-grid span,
+.management-grid span,
+.ledger-summary-grid span,
+.purchase-summary-grid span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.summary strong,
+.summary-grid strong,
+.report-grid strong,
+.management-grid strong,
+.ledger-summary-grid strong,
+.purchase-summary-grid strong {
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.final,
+.ledger-summary-grid .final,
+.purchase-summary-grid .final {
+  background: var(--brand-soft) !important;
+  border-color: var(--brand-border) !important;
+}
+
+.final span,
+.ledger-summary-grid .final span,
+.purchase-summary-grid .final span {
+  color: var(--brand-dark) !important;
+}
+
+/* Chart */
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.chart-card h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.chart {
+  display: grid;
+  gap: 16px;
+}
+
+.chart-row {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  box-shadow: var(--shadow-soft);
+}
+
+.chart-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.chart-info > span {
+  min-width: 80px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.chart-money {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  direction: rtl;
+}
+
+.chart-money strong {
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.6;
+}
+
+.chart-money small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.8;
+}
+
+.chart-track {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #f1f5f9;
+  border: 1px solid var(--line);
+}
+
+.chart-fill {
+  height: 100%;
+  min-width: 4px;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.chart-fill.income {
+  background: linear-gradient(90deg, #22c55e, var(--success));
+}
+
+.chart-fill.expense {
+  background: linear-gradient(90deg, #ef4444, var(--danger));
+}
+
+/* Auth */
+.auth-card,
+.auth-container,
+.login-card {
+  max-width: 460px;
+  margin: 40px auto;
+  display: grid;
+  gap: 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  direction: rtl;
+}
+
+.auth-card h1,
+.auth-card h2,
+.auth-container h1,
+.auth-container h2,
+.login-card h1,
+.login-card h2 {
+  margin: 0;
+  color: var(--text);
+  font-weight: 900;
+}
+
+.auth-card form,
+.auth-container form,
+.login-card form {
+  display: grid;
+  gap: 12px;
+}
+
+/* Transaction / Cash */
+.transaction-form,
+.transaction-list,
+.invoice-card {
+  display: grid;
+  gap: 16px;
+}
+
+.transaction-form form,
+.transaction-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.transaction-form .full,
+.transaction-form-grid .full {
+  grid-column: 1 / -1;
+}
+
+.transaction-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.transaction-list li,
+.transaction-item {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Customers + Products */
+.customers-page,
+.products-page,
+.sales-card,
+.purchase-card,
+.ledger-card,
+.reports-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  direction: rtl;
+}
+
+.customer-form,
+.product-form,
+.sales-form,
+.purchase-form,
+.ledger-payment-form {
+  display: grid;
+  gap: 16px;
+}
+
+.customer-form-grid,
+.product-form-grid,
+.sales-form-grid,
+.purchase-form-grid,
+.ledger-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--card);
+  box-shadow: var(--shadow-soft);
+}
+
+.customer-form-grid > div,
+.product-form-grid > div,
+.sales-form-grid > div,
+.purchase-form-grid > div,
+.ledger-form-grid > div {
+  display: grid;
+  gap: 8px;
+}
+
+.customer-form-grid .full,
+.product-form-grid .full,
+.sales-form-grid .full,
+.purchase-form-grid .full,
+.ledger-form-grid .full {
+  grid-column: 1 / -1;
+}
+
+/* Sales + Purchase invoice */
+.sales-header,
+.purchase-header,
+.ledger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sales-header h2,
+.purchase-header h2,
+.ledger-header h2 {
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.sales-header p,
+.purchase-header p,
+.ledger-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sales-table,
+.purchase-table,
+.ledger-table {
+  min-width: 820px;
+}
+
+.purchase-add-row-box,
+.sales-add-row-box {
+  align-self: end;
+}
+
+.purchase-add-row-box button,
+.sales-add-row-box button {
+  width: 100%;
+  height: 46px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--dark);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+/* Ledger */
+.ledger-select-box {
+  display: grid;
+  gap: 8px;
+  max-width: 420px;
+}
+
+.ledger-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ledger-actions button {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--dark);
+  color: #ffffff;
+  padding: 11px 18px;
+  font-weight: 900;
+}
+
+/* Empty */
+.empty-text {
+  margin: 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--field);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .app {
+    padding: 14px;
+  }
+
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .main-menu {
+    position: static;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .menu-items {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .menu-items button {
+    text-align: center;
+  }
+
+  .header,
+  .app-header,
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 768px) {
+  .summary,
+  .summary-grid,
+  .report-grid,
+  .management-grid,
+  .ledger-summary-grid,
+  .purchase-summary-grid,
+  .customer-form-grid,
+  .product-form-grid,
+  .sales-form-grid,
+  .purchase-form-grid,
+  .ledger-form-grid,
+  .transaction-form form,
+  .transaction-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sales-header,
+  .purchase-header,
+  .ledger-header,
+  .chart-info {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  button[type="submit"],
+  .primary-btn,
+  .submit-btn,
+  .add-btn,
+  .purchase-submit-btn,
+  .ledger-actions button {
+    width: 100%;
+  }
+
+  .chart-money {
+    text-align: right;
+  }
+}
+
+@media (max-width: 520px) {
+  .menu-items {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  th,
+  td {
+    padding: 11px 10px;
+    font-size: 12px;
+  }
+}
