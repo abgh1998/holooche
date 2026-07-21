@@ -4,6 +4,7 @@ import { formatMoney, persianToEnglishNumber } from "../utils/money";
 function CustomerLedgerPage({
   parties = [],
   salesInvoices = [],
+  purchaseInvoices = [],
   partyPayments = [],
   onAddPartyPayment,
   onDeletePartyPayment,
@@ -28,19 +29,29 @@ function CustomerLedgerPage({
     (party) => String(party.id) === String(selectedPartyId)
   );
 
-  const selectedPartyInvoices = salesInvoices.filter((invoice) => {
-    const remaining = Number(
-      invoice.remainingAmount ?? invoice.finalTotal ?? 0
-    );
+  const selectedPartySalesInvoices = salesInvoices.filter((invoice) => {
+    const remaining = Number(invoice.remainingAmount ?? invoice.finalTotal ?? 0);
 
     return (
       String(invoice.customerId) === String(selectedPartyId) && remaining > 0
     );
   });
 
-  const selectedInvoice = selectedPartyInvoices.find(
+  const selectedInvoice = selectedPartySalesInvoices.find(
     (invoice) => String(invoice.id) === String(selectedInvoiceId)
   );
+
+  function getInvoiceStatusLabel(status) {
+    if (status === "paid") {
+      return "تسویه شده";
+    }
+
+    if (status === "partial") {
+      return "نیمه تسویه";
+    }
+
+    return "پرداخت نشده";
+  }
 
   const formatNumberInput = (value) => {
     const englishValue = persianToEnglishNumber(value);
@@ -95,18 +106,34 @@ function CustomerLedgerPage({
       });
     }
 
-    const partyInvoices = salesInvoices.filter(
+    const partySalesInvoices = salesInvoices.filter(
       (invoice) => String(invoice.customerId) === String(selectedParty.id)
     );
 
-    partyInvoices.forEach((invoice) => {
+    partySalesInvoices.forEach((invoice) => {
       entries.push({
-        id: `invoice-${invoice.id}`,
-        type: "invoice",
+        id: `sales-invoice-${invoice.id}`,
+        type: "sales_invoice",
         title: `فاکتور فروش ${invoice.invoiceNumber}`,
         date: invoice.createdAt,
         debit: Number(invoice.finalTotal || 0),
         credit: 0,
+        description: getInvoiceStatusLabel(invoice.paymentStatus),
+      });
+    });
+
+    const partyPurchaseInvoices = purchaseInvoices.filter(
+      (invoice) => String(invoice.supplierId) === String(selectedParty.id)
+    );
+
+    partyPurchaseInvoices.forEach((invoice) => {
+      entries.push({
+        id: `purchase-invoice-${invoice.id}`,
+        type: "purchase_invoice",
+        title: `فاکتور خرید ${invoice.invoiceNumber}`,
+        date: invoice.createdAt,
+        debit: 0,
+        credit: Number(invoice.finalTotal || 0),
         description: getInvoiceStatusLabel(invoice.paymentStatus),
       });
     });
@@ -117,7 +144,8 @@ function CustomerLedgerPage({
 
     payments.forEach((payment) => {
       const isReceive = payment.paymentType === "receive";
-      const relatedInvoice = salesInvoices.find(
+
+      const relatedSalesInvoice = salesInvoices.find(
         (invoice) => String(invoice.id) === String(payment.invoiceId)
       );
 
@@ -132,12 +160,12 @@ function CustomerLedgerPage({
         description:
           payment.note ||
           payment.referenceNumber ||
-          (relatedInvoice
-            ? `بابت فاکتور ${relatedInvoice.invoiceNumber}`
+          (relatedSalesInvoice
+            ? `بابت فاکتور فروش ${relatedSalesInvoice.invoiceNumber}`
             : "-"),
         paymentMethod: payment.paymentMethod,
         referenceNumber: payment.referenceNumber,
-        invoiceNumber: relatedInvoice?.invoiceNumber || "",
+        invoiceNumber: relatedSalesInvoice?.invoiceNumber || "",
       });
     });
 
@@ -172,7 +200,7 @@ function CustomerLedgerPage({
       totalCredit,
       balance: totalDebit - totalCredit,
     };
-  }, [selectedParty, salesInvoices, partyPayments]);
+  }, [selectedParty, salesInvoices, purchaseInvoices, partyPayments]);
 
   const getBalanceText = (balance) => {
     if (balance > 0) {
@@ -185,18 +213,6 @@ function CustomerLedgerPage({
 
     return "تسویه";
   };
-
-  function getInvoiceStatusLabel(status) {
-    if (status === "paid") {
-      return "تسویه شده";
-    }
-
-    if (status === "partial") {
-      return "نیمه تسویه";
-    }
-
-    return "پرداخت نشده";
-  }
 
   const getPaymentMethodLabel = (method) => {
     if (method === "cash") {
@@ -233,7 +249,7 @@ function CustomerLedgerPage({
       return;
     }
 
-    if (selectedInvoice) {
+    if (selectedInvoice && paymentType === "receive") {
       const invoiceRemaining = Number(
         selectedInvoice.remainingAmount ?? selectedInvoice.finalTotal ?? 0
       );
@@ -246,7 +262,8 @@ function CustomerLedgerPage({
 
     onAddPartyPayment({
       partyId: selectedParty.id,
-      invoiceId: selectedInvoice ? selectedInvoice.id : null,
+      invoiceId:
+        paymentType === "receive" && selectedInvoice ? selectedInvoice.id : null,
       paymentType,
       amount: pureAmount,
       paymentMethod,
@@ -292,6 +309,7 @@ function CustomerLedgerPage({
       <html lang="fa" dir="rtl">
         <head>
           <title>صورت حساب ${selectedParty.name}</title>
+
           <style>
             body {
               direction: rtl;
@@ -472,7 +490,7 @@ function CustomerLedgerPage({
 
                 {paymentType === "receive" && (
                   <div>
-                    <label>تسویه فاکتور</label>
+                    <label>تسویه فاکتور فروش</label>
 
                     <select
                       value={selectedInvoiceId}
@@ -480,7 +498,7 @@ function CustomerLedgerPage({
                     >
                       <option value="">بدون اتصال به فاکتور</option>
 
-                      {selectedPartyInvoices.map((invoice) => {
+                      {selectedPartySalesInvoices.map((invoice) => {
                         const remaining = Number(
                           invoice.remainingAmount ?? invoice.finalTotal ?? 0
                         );
@@ -592,7 +610,7 @@ function CustomerLedgerPage({
                                   : ""
                               } ${
                                 entry.invoiceNumber
-                                  ? `- فاکتور ${entry.invoiceNumber}`
+                                  ? `- فاکتور فروش ${entry.invoiceNumber}`
                                   : ""
                               }`
                             : entry.description}
