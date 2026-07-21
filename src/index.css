@@ -3794,3 +3794,890 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   Cash Page / صندوق Sub Components Fix
+   TransactionForm + TransactionList + Invoice
+   بدون تغییر رنگ کلی پروژه
+========================================================= */
+
+/* Cash page cards */
+.transaction-form,
+.transaction-list,
+.invoice-card,
+.cash-card,
+.cash-page .card {
+  width: 100%;
+  display: grid;
+  gap: 16px;
+  direction: rtl;
+}
+
+/* Titles */
+.transaction-form h2,
+.transaction-form h3,
+.transaction-list h2,
+.transaction-list h3,
+.invoice-card h2,
+.invoice-card h3,
+.cash-card h2,
+.cash-card h3 {
+  margin: 0;
+  color: var(--text, #111827);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.transaction-form p,
+.transaction-list p,
+.invoice-card p,
+.cash-card p {
+  margin: 0;
+  color: var(--muted, #64748b);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Transaction form layout */
+.transaction-form form,
+.transaction-form-grid,
+.cash-form,
+.cash-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 22px;
+  background: var(--card, #ffffff);
+  box-shadow: var(--shadow-soft, 0 10px 24px rgba(15, 23, 42, 0.04));
+}
+
+.transaction-form form > div,
+.transaction-form-grid > div,
+.cash-form > div,
+.cash-form-grid > div {
+  display: grid;
+  gap: 8px;
+}
+
+.transaction-form .full,
+.transaction-form-grid .full,
+.cash-form .full,
+.cash-form-grid .full {
+  grid-column: 1 / -1;
+}
+
+/* Inputs inside cash */
+.transaction-form label,
+.cash-form label,
+.cash-form-grid label {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.transaction-form input,
+.transaction-form select,
+.transaction-form textarea,
+.cash-form input,
+.cash-form select,
+.cash-form textarea,
+.cash-form-grid input,
+.cash-form-grid select,
+.cash-form-grid textarea {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius-sm, 14px);
+  background: var(--field, #f9fafb);
+  color: var(--text, #111827);
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  direction: rtl;
+}
+
+.transaction-form textarea,
+.cash-form textarea,
+.cash-form-grid textarea {
+  padding: 12px;
+  min-height: 90px;
+  resize: vertical;
+}
+
+.transaction-form input:focus,
+.transaction-form select:focus,
+.transaction-form textarea:focus,
+.cash-form input:focus,
+.cash-form select:focus,
+.cash-form textarea:focus,
+.cash-form-grid input:focus,
+.cash-form-grid select:focus,
+.cash-form-grid textarea:focus {
+  border-color: #fb923c;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.12);
+}
+
+/* Submit buttons in cash */
+.transaction-form button[type="submit"],
+.cash-form button[type="submit"],
+.cash-submit-btn {
+  justify-self: start;
+  border: 0;
+  border-radius: var(--radius-sm, 14px);
+  background: var(--brand, #ea580c);
+  color: #ffffff;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.2);
+}
+
+.transaction-form button[type="submit"]:hover,
+.cash-form button[type="submit"]:hover,
+.cash-submit-btn:hover {
+  background: var(--brand-dark, #c2410c);
+}
+
+/* Transaction list */
+.transaction-list {
+  display: grid;
+  gap: 14px;
+}
+
+.transaction-list-header,
+.transaction-list .list-header,
+.cash-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line, #e5e7eb);
+}
+
+.transaction-list ul,
+.transactions,
+.transaction-items,
+.cash-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+/* Transaction item */
+.transaction-list li,
+.transaction-item,
+.cash-item {
+  width: 100%;
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: var(--radius-md, 18px);
+  background: var(--card, #ffffff);
+  box-shadow: var(--shadow-soft, 0 10px 24px rgba(15, 23, 42, 0.04));
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.transaction-list li:hover,
+.transaction-item:hover,
+.cash-item:hover {
+  background: var(--brand-soft, #fff7ed);
+  border-color: var(--brand-border, #fed7aa);
+}
+
+.transaction-list li.active,
+.transaction-item.active,
+.cash-item.active,
+.transaction-list .active {
+  background: var(--brand-soft, #fff7ed);
+  border-color: #fdba74;
+}
+
+/* Transaction content */
+.transaction-info,
+.transaction-content,
+.cash-item-info {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.transaction-title,
+.transaction-info strong,
+.transaction-content strong,
+.cash-item-info strong {
+  color: var(--text, #111827);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.7;
+}
+
+.transaction-meta,
+.transaction-date,
+.transaction-info small,
+.transaction-content small,
+.cash-item-info small {
+  color: var(--muted, #64748b);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.transaction-amount,
+.cash-item-amount {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  direction: rtl;
+  font-size: 15px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.transaction-amount.income,
+.cash-item-amount.income,
+.transaction-item.income .transaction-amount {
+  color: var(--success, #16a34a);
+}
+
+.transaction-amount.expense,
+.cash-item-amount.expense,
+.transaction-item.expense .transaction-amount {
+  color: var(--danger, #dc2626);
+}
+
+/* Transaction actions */
+.transaction-actions,
+.cash-item-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.transaction-actions button,
+.cash-item-actions button,
+.transaction-list button {
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 12px;
+  background: var(--field, #f9fafb);
+  color: #334155;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.transaction-actions button:hover,
+.cash-item-actions button:hover,
+.transaction-list button:hover {
+  background: var(--brand-soft, #fff7ed);
+  color: var(--brand-dark, #c2410c);
+  border-color: #fdba74;
+}
+
+.transaction-actions .delete-btn,
+.cash-item-actions .delete-btn,
+.transaction-list .delete-btn,
+.transaction-list .clear-btn,
+.clear-transactions-btn {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.transaction-actions .delete-btn:hover,
+.cash-item-actions .delete-btn:hover,
+.transaction-list .delete-btn:hover,
+.transaction-list .clear-btn:hover,
+.clear-transactions-btn:hover {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Empty transaction list */
+.transaction-list .empty-text,
+.cash-empty,
+.transactions-empty {
+  margin: 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--field, #f9fafb);
+  color: var(--muted, #64748b);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Invoice / receipt box in cash */
+.invoice-card {
+  display: grid;
+  gap: 16px;
+}
+
+.invoice-card .invoice-header,
+.invoice-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line, #e5e7eb);
+}
+
+.invoice-header h2,
+.invoice-header h3 {
+  margin: 0;
+  color: var(--text, #111827);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.invoice-header p,
+.invoice-header span {
+  margin: 0;
+  color: var(--muted, #64748b);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.invoice-body,
+.invoice-details,
+.receipt-body {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: var(--radius-md, 18px);
+  background: var(--field, #f9fafb);
+}
+
+.invoice-row,
+.invoice-detail-row,
+.receipt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--line, #e5e7eb);
+}
+
+.invoice-row:last-child,
+.invoice-detail-row:last-child,
+.receipt-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.invoice-row span,
+.invoice-detail-row span,
+.receipt-row span {
+  color: var(--muted, #64748b);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.invoice-row strong,
+.invoice-detail-row strong,
+.receipt-row strong {
+  color: var(--text, #111827);
+  font-size: 14px;
+  font-weight: 900;
+  text-align: left;
+  direction: rtl;
+}
+
+/* Invoice print/action buttons */
+.invoice-actions,
+.receipt-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.invoice-actions button,
+.receipt-actions button,
+.invoice-card button {
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: var(--radius-sm, 14px);
+  background: var(--dark, #111827);
+  color: #ffffff;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.invoice-actions button:hover,
+.receipt-actions button:hover,
+.invoice-card button:hover {
+  background: #0f172a;
+}
+
+/* Generic table if cash uses table */
+.transaction-table-wrap,
+.cash-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: var(--radius-md, 18px);
+  background: var(--card, #ffffff);
+}
+
+.transaction-table,
+.cash-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+.transaction-table th,
+.transaction-table td,
+.cash-table th,
+.cash-table td {
+  padding: 13px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--line, #e5e7eb);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.transaction-table th,
+.cash-table th {
+  background: var(--field, #f9fafb);
+  color: #334155;
+  font-weight: 900;
+}
+
+.transaction-table td,
+.cash-table td {
+  color: var(--text, #111827);
+  font-weight: 700;
+}
+
+/* Mobile cash */
+@media (max-width: 768px) {
+  .transaction-form form,
+  .transaction-form-grid,
+  .cash-form,
+  .cash-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-form button[type="submit"],
+  .cash-form button[type="submit"],
+  .cash-submit-btn,
+  .invoice-actions button,
+  .receipt-actions button {
+    width: 100%;
+  }
+
+  .transaction-list-header,
+  .transaction-list .list-header,
+  .cash-list-header,
+  .invoice-header,
+  .invoice-card .invoice-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .transaction-list li,
+  .transaction-item,
+  .cash-item {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-amount,
+  .cash-item-amount {
+    text-align: right;
+  }
+
+  .transaction-actions,
+  .cash-item-actions,
+  .invoice-actions,
+  .receipt-actions {
+    justify-content: stretch;
+    flex-direction: column;
+  }
+
+  .transaction-actions button,
+  .cash-item-actions button {
+    width: 100%;
+  }
+
+  .invoice-row,
+  .invoice-detail-row,
+  .receipt-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .invoice-row strong,
+  .invoice-detail-row strong,
+  .receipt-row strong {
+    text-align: right;
+  }
+}
+/* =========================================================
+   Sales Invoice Page / فاکتور فروش Sub Components Fix
+   بدون تغییر رنگ کلی پروژه
+========================================================= */
+
+.sales-card,
+.sales-page,
+.sales-invoice-page,
+.sales-invoice-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  direction: rtl;
+}
+
+/* Header */
+.sales-header,
+.sales-invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line, #e5e7eb);
+}
+
+.sales-header h2,
+.sales-header h3,
+.sales-invoice-header h2,
+.sales-invoice-header h3 {
+  margin: 0 0 6px;
+  color: var(--text, #111827);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.sales-header p,
+.sales-invoice-header p {
+  margin: 0;
+  color: var(--muted, #64748b);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Form */
+.sales-form,
+.sales-invoice-form {
+  display: grid;
+  gap: 18px;
+  direction: rtl;
+}
+
+.sales-form-grid,
+.sales-invoice-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 22px;
+  background: var(--card, #ffffff);
+  box-shadow: var(--shadow-soft, 0 10px 24px rgba(15, 23, 42, 0.04));
+}
+
+.sales-form-grid > div,
+.sales-invoice-form-grid > div {
+  display: grid;
+  gap: 8px;
+}
+
+.sales-form-grid .full,
+.sales-invoice-form-grid .full {
+  grid-column: 1 / -1;
+}
+
+.sales-form-grid label,
+.sales-invoice-form-grid label,
+.sales-form label,
+.sales-invoice-form label {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.sales-form-grid input,
+.sales-form-grid select,
+.sales-form-grid textarea,
+.sales-invoice-form-grid input,
+.sales-invoice-form-grid select,
+.sales-invoice-form-grid textarea,
+.sales-form input,
+.sales-form select,
+.sales-form textarea,
+.sales-invoice-form input,
+.sales-invoice-form select,
+.sales-invoice-form textarea {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius-sm, 14px);
+  background: var(--field, #f9fafb);
+  color: var(--text, #111827);
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  direction: rtl;
+}
+
+.sales-form-grid textarea,
+.sales-invoice-form-grid textarea,
+.sales-form textarea,
+.sales-invoice-form textarea {
+  padding: 12px;
+  min-height: 90px;
+  resize: vertical;
+}
+
+.sales-form-grid input:focus,
+.sales-form-grid select:focus,
+.sales-form-grid textarea:focus,
+.sales-invoice-form-grid input:focus,
+.sales-invoice-form-grid select:focus,
+.sales-invoice-form-grid textarea:focus,
+.sales-form input:focus,
+.sales-form select:focus,
+.sales-form textarea:focus,
+.sales-invoice-form input:focus,
+.sales-invoice-form select:focus,
+.sales-invoice-form textarea:focus {
+  border-color: #fb923c;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.12);
+}
+
+/* Add row button */
+.sales-add-row-box,
+.sales-add-row,
+.sales-row-action {
+  align-self: end;
+}
+
+.sales-add-row-box button,
+.sales-add-row button,
+.sales-row-action button {
+  width: 100%;
+  height: 46px;
+  border: 0;
+  border-radius: var(--radius-sm, 14px);
+  background: var(--dark, #111827);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.sales-add-row-box button:hover,
+.sales-add-row button:hover,
+.sales-row-action button:hover {
+  background: #0f172a;
+}
+
+/* Tables */
+.sales-table-wrap,
+.sales-invoice-table-wrap,
+.sales-list-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: var(--radius-md, 18px);
+  background: var(--card, #ffffff);
+}
+
+.sales-table,
+.sales-invoice-table,
+.sales-list-table {
+  width: 100%;
+  min-width: 820px;
+  border-collapse: collapse;
+}
+
+.sales-table th,
+.sales-table td,
+.sales-invoice-table th,
+.sales-invoice-table td,
+.sales-list-table th,
+.sales-list-table td {
+  padding: 13px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--line, #e5e7eb);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.sales-table th,
+.sales-invoice-table th,
+.sales-list-table th {
+  background: var(--field, #f9fafb);
+  color: #334155;
+  font-weight: 900;
+}
+
+.sales-table td,
+.sales-invoice-table td,
+.sales-list-table td {
+  color: var(--text, #111827);
+  font-weight: 700;
+}
+
+.sales-table tbody tr:hover,
+.sales-invoice-table tbody tr:hover,
+.sales-list-table tbody tr:hover {
+  background: var(--brand-soft, #fff7ed);
+}
+
+/* Delete row button */
+.sales-delete-row-btn,
+.sales-remove-row-btn,
+.sales-row-delete-btn {
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.sales-delete-row-btn:hover,
+.sales-remove-row-btn:hover,
+.sales-row-delete-btn:hover {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Summary */
+.sales-summary-grid,
+.sales-invoice-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sales-summary-grid > div,
+.sales-invoice-summary-grid > div {
+  padding: 16px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: var(--radius-md, 18px);
+  background: var(--card, #ffffff);
+  box-shadow: var(--shadow-soft, 0 10px 24px rgba(15, 23, 42, 0.04));
+}
+
+.sales-summary-grid span,
+.sales-invoice-summary-grid span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted, #64748b);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.sales-summary-grid strong,
+.sales-invoice-summary-grid strong {
+  color: var(--text, #111827);
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.sales-summary-grid .final,
+.sales-invoice-summary-grid .final {
+  background: var(--brand-soft, #fff7ed) !important;
+  border-color: var(--brand-border, #fed7aa) !important;
+}
+
+.sales-summary-grid .final span,
+.sales-invoice-summary-grid .final span {
+  color: var(--brand-dark, #c2410c) !important;
+}
+
+/* Submit */
+.sales-submit-btn,
+.sales-invoice-submit-btn,
+.sales-form button[type="submit"],
+.sales-invoice-form button[type="submit"] {
+  justify-self: start;
+  border: 0;
+  border-radius: var(--radius-sm, 14px);
+  background: var(--brand, #ea580c);
+  color: #ffffff;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.2);
+}
+
+.sales-submit-btn:hover,
+.sales-invoice-submit-btn:hover,
+.sales-form button[type="submit"]:hover,
+.sales-invoice-form button[type="submit"]:hover {
+  background: var(--brand-dark, #c2410c);
+}
+
+/* Sales invoice list */
+.sales-list,
+.sales-invoice-list {
+  display: grid;
+  gap: 14px;
+  padding-top: 6px;
+}
+
+.sales-list h3,
+.sales-invoice-list h3 {
+  margin: 0;
+  color: var(--text, #111827);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+/* Generic fallback for unknown inner classes inside sales section */
+.sales-card > div:not(.sales-header),
+.sales-page > div:not(.sales-header),
+.sales-invoice-page > div:not(.sales-invoice-header) {
+  min-width: 0;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .sales-header,
+  .sales-invoice-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sales-form-grid,
+  .sales-invoice-form-grid,
+  .sales-summary-grid,
+  .sales-invoice-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sales-submit-btn,
+  .sales-invoice-submit-btn,
+  .sales-form button[type="submit"],
+  .sales-invoice-form button[type="submit"] {
+    width: 100%;
+  }
+}
