@@ -40,6 +40,7 @@ import {
 import {
   fetchPurchaseInvoices,
   insertPurchaseInvoice,
+  updatePurchaseInvoiceSettlement,
 } from "./services/purchaseInvoicesApi";
 
 import {
@@ -413,13 +414,57 @@ function App() {
 
         if (settlementError) {
           console.error("Update invoice settlement error:", settlementError);
-          alert("دریافت ثبت شد، اما وضعیت تسویه فاکتور آپدیت نشد");
+          alert("دریافت ثبت شد، اما وضعیت تسویه فاکتور فروش آپدیت نشد");
         }
 
         if (!settlementError && updatedInvoice) {
           setSalesInvoices((prevInvoices) =>
             prevInvoices.map((invoice) =>
               invoice.id === updatedInvoice.id ? updatedInvoice : invoice
+            )
+          );
+        }
+      }
+    }
+
+    if (data.purchaseInvoiceId && data.paymentType === "pay") {
+      const relatedPurchaseInvoice = purchaseInvoices.find(
+        (invoice) => String(invoice.id) === String(data.purchaseInvoiceId)
+      );
+
+      if (relatedPurchaseInvoice) {
+        const previousPaidAmount = partyPayments
+          .filter(
+            (item) =>
+              String(item.purchaseInvoiceId) ===
+                String(data.purchaseInvoiceId) && item.paymentType === "pay"
+          )
+          .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+        const totalPaid = previousPaidAmount + Number(data.amount || 0);
+
+        const { data: updatedPurchaseInvoice, error: settlementError } =
+          await updatePurchaseInvoiceSettlement(
+            currentUser.id,
+            relatedPurchaseInvoice.id,
+            relatedPurchaseInvoice.finalTotal,
+            totalPaid
+          );
+
+        if (settlementError) {
+          console.error(
+            "Update purchase invoice settlement error:",
+            settlementError
+          );
+          alert("پرداخت ثبت شد، اما وضعیت تسویه فاکتور خرید آپدیت نشد");
+        }
+
+        if (!settlementError && updatedPurchaseInvoice) {
+          setPurchaseInvoices((prevInvoices) =>
+            prevInvoices.map((invoice) =>
+              invoice.id === updatedPurchaseInvoice.id
+                ? updatedPurchaseInvoice
+                : invoice
             )
           );
         }
@@ -528,13 +573,61 @@ function App() {
             "Update invoice settlement after delete error:",
             settlementError
           );
-          alert("دریافت حذف شد، اما وضعیت تسویه فاکتور آپدیت نشد");
+          alert("دریافت حذف شد، اما وضعیت تسویه فاکتور فروش آپدیت نشد");
         }
 
         if (!settlementError && updatedInvoice) {
           setSalesInvoices((prevInvoices) =>
             prevInvoices.map((invoice) =>
               invoice.id === updatedInvoice.id ? updatedInvoice : invoice
+            )
+          );
+        }
+      }
+    }
+
+    if (
+      deletedPayment?.purchaseInvoiceId &&
+      deletedPayment.paymentType === "pay"
+    ) {
+      const relatedPurchaseInvoice = purchaseInvoices.find(
+        (invoice) =>
+          String(invoice.id) === String(deletedPayment.purchaseInvoiceId)
+      );
+
+      if (relatedPurchaseInvoice) {
+        const totalPaidAfterDelete = partyPayments
+          .filter(
+            (item) =>
+              String(item.purchaseInvoiceId) ===
+                String(deletedPayment.purchaseInvoiceId) &&
+              String(item.id) !== String(paymentId) &&
+              item.paymentType === "pay"
+          )
+          .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+        const { data: updatedPurchaseInvoice, error: settlementError } =
+          await updatePurchaseInvoiceSettlement(
+            currentUser.id,
+            relatedPurchaseInvoice.id,
+            relatedPurchaseInvoice.finalTotal,
+            totalPaidAfterDelete
+          );
+
+        if (settlementError) {
+          console.error(
+            "Update purchase invoice settlement after delete error:",
+            settlementError
+          );
+          alert("پرداخت حذف شد، اما وضعیت تسویه فاکتور خرید آپدیت نشد");
+        }
+
+        if (!settlementError && updatedPurchaseInvoice) {
+          setPurchaseInvoices((prevInvoices) =>
+            prevInvoices.map((invoice) =>
+              invoice.id === updatedPurchaseInvoice.id
+                ? updatedPurchaseInvoice
+                : invoice
             )
           );
         }

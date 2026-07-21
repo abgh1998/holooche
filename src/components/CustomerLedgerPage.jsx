@@ -11,7 +11,8 @@ function CustomerLedgerPage({
   onBack,
 }) {
   const [selectedPartyId, setSelectedPartyId] = useState("");
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState("");
+  const [selectedSalesInvoiceId, setSelectedSalesInvoiceId] = useState("");
+  const [selectedPurchaseInvoiceId, setSelectedPurchaseInvoiceId] = useState("");
   const [paymentType, setPaymentType] = useState("receive");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [amount, setAmount] = useState("");
@@ -37,8 +38,20 @@ function CustomerLedgerPage({
     );
   });
 
-  const selectedInvoice = selectedPartySalesInvoices.find(
-    (invoice) => String(invoice.id) === String(selectedInvoiceId)
+  const selectedPartyPurchaseInvoices = purchaseInvoices.filter((invoice) => {
+    const remaining = Number(invoice.remainingAmount ?? invoice.finalTotal ?? 0);
+
+    return (
+      String(invoice.supplierId) === String(selectedPartyId) && remaining > 0
+    );
+  });
+
+  const selectedSalesInvoice = selectedPartySalesInvoices.find(
+    (invoice) => String(invoice.id) === String(selectedSalesInvoiceId)
+  );
+
+  const selectedPurchaseInvoice = selectedPartyPurchaseInvoices.find(
+    (invoice) => String(invoice.id) === String(selectedPurchaseInvoiceId)
   );
 
   function getInvoiceStatusLabel(status) {
@@ -149,6 +162,10 @@ function CustomerLedgerPage({
         (invoice) => String(invoice.id) === String(payment.invoiceId)
       );
 
+      const relatedPurchaseInvoice = purchaseInvoices.find(
+        (invoice) => String(invoice.id) === String(payment.purchaseInvoiceId)
+      );
+
       entries.push({
         id: `payment-${payment.id}`,
         realId: payment.id,
@@ -162,10 +179,13 @@ function CustomerLedgerPage({
           payment.referenceNumber ||
           (relatedSalesInvoice
             ? `بابت فاکتور فروش ${relatedSalesInvoice.invoiceNumber}`
+            : relatedPurchaseInvoice
+            ? `بابت فاکتور خرید ${relatedPurchaseInvoice.invoiceNumber}`
             : "-"),
         paymentMethod: payment.paymentMethod,
         referenceNumber: payment.referenceNumber,
-        invoiceNumber: relatedSalesInvoice?.invoiceNumber || "",
+        salesInvoiceNumber: relatedSalesInvoice?.invoiceNumber || "",
+        purchaseInvoiceNumber: relatedPurchaseInvoice?.invoiceNumber || "",
       });
     });
 
@@ -249,13 +269,28 @@ function CustomerLedgerPage({
       return;
     }
 
-    if (selectedInvoice && paymentType === "receive") {
+    if (paymentType === "receive" && selectedSalesInvoice) {
       const invoiceRemaining = Number(
-        selectedInvoice.remainingAmount ?? selectedInvoice.finalTotal ?? 0
+        selectedSalesInvoice.remainingAmount ??
+          selectedSalesInvoice.finalTotal ??
+          0
       );
 
       if (pureAmount > invoiceRemaining) {
-        alert("مبلغ دریافت نباید بیشتر از مانده فاکتور باشد");
+        alert("مبلغ دریافت نباید بیشتر از مانده فاکتور فروش باشد");
+        return;
+      }
+    }
+
+    if (paymentType === "pay" && selectedPurchaseInvoice) {
+      const invoiceRemaining = Number(
+        selectedPurchaseInvoice.remainingAmount ??
+          selectedPurchaseInvoice.finalTotal ??
+          0
+      );
+
+      if (pureAmount > invoiceRemaining) {
+        alert("مبلغ پرداخت نباید بیشتر از مانده فاکتور خرید باشد");
         return;
       }
     }
@@ -263,7 +298,13 @@ function CustomerLedgerPage({
     onAddPartyPayment({
       partyId: selectedParty.id,
       invoiceId:
-        paymentType === "receive" && selectedInvoice ? selectedInvoice.id : null,
+        paymentType === "receive" && selectedSalesInvoice
+          ? selectedSalesInvoice.id
+          : null,
+      purchaseInvoiceId:
+        paymentType === "pay" && selectedPurchaseInvoice
+          ? selectedPurchaseInvoice.id
+          : null,
       paymentType,
       amount: pureAmount,
       paymentMethod,
@@ -275,7 +316,8 @@ function CustomerLedgerPage({
     setAmount("");
     setReferenceNumber("");
     setNote("");
-    setSelectedInvoiceId("");
+    setSelectedSalesInvoiceId("");
+    setSelectedPurchaseInvoiceId("");
     setPaymentType("receive");
     setPaymentMethod("cash");
   };
@@ -434,7 +476,8 @@ function CustomerLedgerPage({
             value={selectedPartyId}
             onChange={(e) => {
               setSelectedPartyId(e.target.value);
-              setSelectedInvoiceId("");
+              setSelectedSalesInvoiceId("");
+              setSelectedPurchaseInvoiceId("");
             }}
           >
             <option value="">انتخاب کنید</option>
@@ -477,10 +520,8 @@ function CustomerLedgerPage({
                     value={paymentType}
                     onChange={(e) => {
                       setPaymentType(e.target.value);
-
-                      if (e.target.value === "pay") {
-                        setSelectedInvoiceId("");
-                      }
+                      setSelectedSalesInvoiceId("");
+                      setSelectedPurchaseInvoiceId("");
                     }}
                   >
                     <option value="receive">دریافت از مشتری</option>
@@ -493,12 +534,42 @@ function CustomerLedgerPage({
                     <label>تسویه فاکتور فروش</label>
 
                     <select
-                      value={selectedInvoiceId}
-                      onChange={(e) => setSelectedInvoiceId(e.target.value)}
+                      value={selectedSalesInvoiceId}
+                      onChange={(e) =>
+                        setSelectedSalesInvoiceId(e.target.value)
+                      }
                     >
                       <option value="">بدون اتصال به فاکتور</option>
 
                       {selectedPartySalesInvoices.map((invoice) => {
+                        const remaining = Number(
+                          invoice.remainingAmount ?? invoice.finalTotal ?? 0
+                        );
+
+                        return (
+                          <option key={invoice.id} value={invoice.id}>
+                            {invoice.invoiceNumber} - مانده:{" "}
+                            {formatMoney(remaining)}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                )}
+
+                {paymentType === "pay" && (
+                  <div>
+                    <label>تسویه فاکتور خرید</label>
+
+                    <select
+                      value={selectedPurchaseInvoiceId}
+                      onChange={(e) =>
+                        setSelectedPurchaseInvoiceId(e.target.value)
+                      }
+                    >
+                      <option value="">بدون اتصال به فاکتور</option>
+
+                      {selectedPartyPurchaseInvoices.map((invoice) => {
                         const remaining = Number(
                           invoice.remainingAmount ?? invoice.finalTotal ?? 0
                         );
@@ -609,8 +680,12 @@ function CustomerLedgerPage({
                                   ? `- ${entry.referenceNumber}`
                                   : ""
                               } ${
-                                entry.invoiceNumber
-                                  ? `- فاکتور فروش ${entry.invoiceNumber}`
+                                entry.salesInvoiceNumber
+                                  ? `- فاکتور فروش ${entry.salesInvoiceNumber}`
+                                  : ""
+                              } ${
+                                entry.purchaseInvoiceNumber
+                                  ? `- فاکتور خرید ${entry.purchaseInvoiceNumber}`
                                   : ""
                               }`
                             : entry.description}
