@@ -5704,3 +5704,333 @@ section.card.sales-card {
     min-width: 760px !important;
   }
 }
+/* =========================================================
+   EXACT FIX - Sales Invoice Form
+   sales-invoice-card + sales-add-row-box + sales-total-panel
+========================================================= */
+
+.sales-invoice-card {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
+  direction: rtl !important;
+}
+
+.sales-invoice-card > h2 {
+  margin: 0 !important;
+  color: var(--text, #111827) !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  line-height: 1.6 !important;
+}
+
+.sales-invoice-card form {
+  width: 100% !important;
+  display: grid !important;
+  gap: 18px !important;
+}
+
+/* بالای فرم: شماره فاکتور، مشتری، توضیحات */
+.sales-invoice-card .sales-form-grid {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  padding: 18px !important;
+  border: 1px solid var(--line, #e5e7eb) !important;
+  border-radius: 22px !important;
+  background: var(--card, #ffffff) !important;
+  box-shadow: var(--shadow-soft, 0 10px 24px rgba(15, 23, 42, 0.04)) !important;
+}
+
+.sales-invoice-card .sales-field {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 8px !important;
+}
+
+.sales-invoice-card .sales-field.full {
+  grid-column: 1 / -1 !important;
+}
+
+.sales-invoice-card label {
+  color: #374151 !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+
+.sales-invoice-card input,
+.sales-invoice-card select {
+  width: 100% !important;
+  height: 46px !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: var(--radius-sm, 14px) !important;
+  background: var(--field, #f9fafb) !important;
+  color: var(--text, #111827) !important;
+  padding: 0 12px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  outline: none !important;
+  direction: rtl !important;
+}
+
+.sales-invoice-card input[readonly] {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  cursor: not-allowed !important;
+}
+
+.sales-invoice-card input:focus,
+.sales-invoice-card select:focus {
+  border-color: #fb923c !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.12) !important;
+}
+
+/* ردیف افزودن کالا / خدمت */
+.sales-invoice-card .sales-add-row-box {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(260px, 2fr) minmax(120px, 1fr) minmax(140px, 1fr) 160px !important;
+  gap: 14px !important;
+  align-items: end !important;
+  padding: 18px !important;
+  border: 1px solid var(--line, #e5e7eb) !important;
+  border-radius: 22px !important;
+  background: var(--card, #ffffff) !important;
+  box-shadow: var(--shadow-soft, 0 10px 24px rgba(15, 23, 42, 0.04)) !important;
+}
+
+.sales-invoice-card .sales-add-row-box button {
+  width: 100% !important;
+  height: 46px !important;
+  border: 0 !important;
+  border-radius: var(--radius-sm, 14px) !important;
+  background: var(--dark, #111827) !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+
+.sales-invoice-card .sales-add-row-box button:hover {
+  background: #0f172a !important;
+}
+
+/* پنل جمع مبلغ */
+.sales-invoice-card .sales-total-panel {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.sales-invoice-card .sales-total-panel > div {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 8px !important;
+  padding: 16px !important;
+  border: 1px solid var(--line, #e5e7eb) !important;
+  border-radius: var(--radius-md, 18px) !important;
+  background: var(--card, #ffffff) !important;
+  box-shadow: var(--shadow-soft, 0 10px 24px rgba(15, 23, 42, 0.04)) !important;
+}
+
+.sales-invoice-card .sales-total-panel span {
+  color: var(--muted, #64748b) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+.sales-invoice-card .sales-total-panel strong {
+  color: var(--text, #111827) !important;
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  line-height: 1.7 !important;
+}
+
+.sales-invoice-card .sales-total-panel small {
+  color: var(--muted, #64748b) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.8 !important;
+}
+
+.sales-invoice-card .sales-total-panel .final {
+  background: var(--brand-soft, #fff7ed) !important;
+  border-color: var(--brand-border, #fed7aa) !important;
+}
+
+.sales-invoice-card .sales-total-panel .final span {
+  color: var(--brand-dark, #c2410c) !important;
+}
+
+/* دکمه ثبت */
+.sales-invoice-card .create-sales-btn {
+  justify-self: start !important;
+  min-width: 190px !important;
+  height: 48px !important;
+  border: 0 !important;
+  border-radius: var(--radius-sm, 14px) !important;
+  background: var(--brand, #ea580c) !important;
+  color: #ffffff !important;
+  padding: 0 24px !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.2) !important;
+}
+
+.sales-invoice-card .create-sales-btn:hover {
+  background: var(--brand-dark, #c2410c) !important;
+}
+
+/* موبایل */
+@media (max-width: 900px) {
+  .sales-invoice-card .sales-add-row-box {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .sales-invoice-card .sales-form-grid,
+  .sales-invoice-card .sales-add-row-box,
+  .sales-invoice-card .sales-total-panel {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sales-invoice-card .create-sales-btn {
+    width: 100% !important;
+  }
+}
+/* =========================================================
+   EXACT FIX - Sales Invoice List
+   sales-list-card + sales-invoice-list + sales-invoice-item
+========================================================= */
+
+.sales-list-card {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
+  direction: rtl !important;
+}
+
+.sales-list-card > h2 {
+  margin: 0 !important;
+  color: var(--text, #111827) !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  line-height: 1.6 !important;
+}
+
+.sales-list-card .sales-invoice-list {
+  width: 100% !important;
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.sales-list-card .sales-invoice-item {
+  width: 100% !important;
+  min-height: 92px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.5fr) minmax(170px, auto) 120px !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 16px !important;
+  border: 1px solid var(--line, #e5e7eb) !important;
+  border-radius: var(--radius-md, 18px) !important;
+  background: var(--card, #ffffff) !important;
+  box-shadow: var(--shadow-soft, 0 10px 24px rgba(15, 23, 42, 0.04)) !important;
+  transition: all 0.2s ease !important;
+}
+
+.sales-list-card .sales-invoice-item:hover {
+  background: var(--brand-soft, #fff7ed) !important;
+  border-color: var(--brand-border, #fed7aa) !important;
+}
+
+.sales-list-card .sales-invoice-item > div:first-child {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 5px !important;
+}
+
+.sales-list-card .sales-invoice-item h3 {
+  margin: 0 !important;
+  color: var(--text, #111827) !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  line-height: 1.6 !important;
+}
+
+.sales-list-card .sales-invoice-item p {
+  margin: 0 !important;
+  color: var(--muted, #64748b) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.7 !important;
+}
+
+.sales-list-card .sales-invoice-total {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 5px !important;
+  text-align: left !important;
+  direction: rtl !important;
+}
+
+.sales-list-card .sales-invoice-total strong {
+  color: var(--text, #111827) !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  line-height: 1.7 !important;
+  white-space: nowrap !important;
+}
+
+.sales-list-card .sales-invoice-total small {
+  color: var(--muted, #64748b) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1.6 !important;
+}
+
+.sales-list-card .sales-invoice-item button {
+  width: 100% !important;
+  height: 42px !important;
+  border: 1px solid var(--line, #e5e7eb) !important;
+  border-radius: var(--radius-sm, 14px) !important;
+  background: var(--dark, #111827) !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  white-space: nowrap !important;
+}
+
+.sales-list-card .sales-invoice-item button:hover {
+  background: #0f172a !important;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .sales-list-card .sales-invoice-item {
+    grid-template-columns: 1fr !important;
+    align-items: stretch !important;
+  }
+
+  .sales-list-card .sales-invoice-total {
+    text-align: right !important;
+  }
+
+  .sales-list-card .sales-invoice-total strong {
+    white-space: normal !important;
+  }
+
+  .sales-list-card .sales-invoice-item button {
+    width: 100% !important;
+  }
+}
