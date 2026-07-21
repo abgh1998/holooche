@@ -12,6 +12,7 @@ import Auth from "./components/Auth";
 import CustomersPage from "./components/CustomersPage";
 import ProductsPage from "./components/ProductsPage";
 import SalesInvoicePage from "./components/SalesInvoicePage";
+import PurchaseInvoicePage from "./components/PurchaseInvoicePage";
 import ReportsPage from "./components/ReportsPage";
 import CustomerLedgerPage from "./components/CustomerLedgerPage";
 import { supabase } from "./lib/supabaseClient";
@@ -35,6 +36,11 @@ import {
   insertSalesInvoice,
   updateSalesInvoiceSettlement,
 } from "./services/salesInvoicesApi";
+
+import {
+  fetchPurchaseInvoices,
+  insertPurchaseInvoice,
+} from "./services/purchaseInvoicesApi";
 
 import {
   fetchTransactions,
@@ -91,6 +97,7 @@ function App() {
   const [parties, setParties] = useState([]);
   const [products, setProducts] = useState([]);
   const [salesInvoices, setSalesInvoices] = useState([]);
+  const [purchaseInvoices, setPurchaseInvoices] = useState([]);
   const [partyPayments, setPartyPayments] = useState([]);
 
   const [selectedTransactionId, setSelectedTransactionId] = useState(() => {
@@ -188,6 +195,27 @@ function App() {
   }, [currentUser]);
 
   useEffect(() => {
+    const loadPurchaseInvoicesFromSupabase = async () => {
+      if (!currentUser?.id) {
+        setPurchaseInvoices([]);
+        return;
+      }
+
+      const { data, error } = await fetchPurchaseInvoices(currentUser.id);
+
+      if (error) {
+        console.error("Fetch purchase invoices error:", error);
+        alert("خطا در دریافت فاکتورهای خرید از سرور");
+        return;
+      }
+
+      setPurchaseInvoices(data);
+    };
+
+    loadPurchaseInvoicesFromSupabase();
+  }, [currentUser]);
+
+  useEffect(() => {
     const loadPartyPaymentsFromSupabase = async () => {
       if (!currentUser?.id) {
         setPartyPayments([]);
@@ -232,6 +260,7 @@ function App() {
     setParties([]);
     setProducts([]);
     setSalesInvoices([]);
+    setPurchaseInvoices([]);
     setPartyPayments([]);
     setActivePage("dashboard");
   };
@@ -251,6 +280,7 @@ function App() {
     setParties([]);
     setProducts([]);
     setSalesInvoices([]);
+    setPurchaseInvoices([]);
     setPartyPayments([]);
     setActivePage("dashboard");
   };
@@ -470,10 +500,7 @@ function App() {
       }
     }
 
-    if (
-      deletedPayment?.invoiceId &&
-      deletedPayment.paymentType === "receive"
-    ) {
+    if (deletedPayment?.invoiceId && deletedPayment.paymentType === "receive") {
       const relatedInvoice = salesInvoices.find(
         (invoice) => String(invoice.id) === String(deletedPayment.invoiceId)
       );
@@ -497,7 +524,10 @@ function App() {
           );
 
         if (settlementError) {
-          console.error("Update invoice settlement after delete error:", settlementError);
+          console.error(
+            "Update invoice settlement after delete error:",
+            settlementError
+          );
           alert("دریافت حذف شد، اما وضعیت تسویه فاکتور آپدیت نشد");
         }
 
@@ -722,6 +752,43 @@ function App() {
     setSelectedTransactionId(transactionData.id);
   };
 
+  const createPurchaseInvoice = async (invoice) => {
+    if (!currentUser?.id) {
+      alert("برای ثبت فاکتور خرید باید وارد حساب کاربری شوید");
+      return;
+    }
+
+    const { data, error } = await insertPurchaseInvoice(currentUser.id, invoice);
+
+    if (error) {
+      console.error("Insert purchase invoice error:", error);
+      alert("خطا در ثبت فاکتور خرید");
+      return;
+    }
+
+    setPurchaseInvoices((prevInvoices) => [data, ...prevInvoices]);
+
+    setProducts((prevProducts) =>
+      prevProducts.map((product) => {
+        const invoiceRow = invoice.rows.find(
+          (row) => String(row.productId) === String(product.id)
+        );
+
+        if (!invoiceRow || product.type === "service") {
+          return product;
+        }
+
+        return {
+          ...product,
+          stock: Number(product.stock || 0) + Number(invoiceRow.quantity || 0),
+          buyPrice: Number(invoiceRow.buyPrice || product.buyPrice || 0),
+        };
+      })
+    );
+
+    alert("فاکتور خرید ثبت شد و موجودی کالا افزایش پیدا کرد");
+  };
+
   const goToDashboard = () => {
     setActivePage("dashboard");
   };
@@ -762,6 +829,17 @@ function App() {
           products={products}
           salesInvoices={salesInvoices}
           onCreateSalesInvoice={createSalesInvoice}
+        />
+      );
+    }
+
+    if (activePage === "purchases") {
+      return (
+        <PurchaseInvoicePage
+          parties={parties}
+          products={products}
+          purchaseInvoices={purchaseInvoices}
+          onCreatePurchaseInvoice={createPurchaseInvoice}
         />
       );
     }

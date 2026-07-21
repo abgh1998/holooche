@@ -13,6 +13,10 @@ function MainMenu({ activePage, onChangePage }) {
       title: "فاکتور فروش",
     },
     {
+      id: "purchases",
+      title: "فاکتور خرید",
+    },
+    {
       id: "products",
       title: "کالاها و خدمات",
     },
