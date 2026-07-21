@@ -6034,3 +6034,146 @@ section.card.sales-card {
     width: 100% !important;
   }
 }
+/* =========================================================
+   HARD FIX - Sales Invoice Registered List
+   فیکس قطعی لیست فاکتورهای فروش
+========================================================= */
+
+section.card.sales-list-card {
+  width: 100% !important;
+  display: grid !important;
+  gap: 18px !important;
+  direction: rtl !important;
+  padding: 22px !important;
+  background: var(--card, #ffffff) !important;
+  border: 1px solid var(--line, #e5e7eb) !important;
+  border-radius: var(--radius-lg, 24px) !important;
+  box-shadow: var(--shadow, 0 14px 35px rgba(15, 23, 42, 0.07)) !important;
+}
+
+section.card.sales-list-card > h2 {
+  margin: 0 !important;
+  padding-bottom: 14px !important;
+  border-bottom: 1px solid var(--line, #e5e7eb) !important;
+  color: var(--text, #111827) !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  line-height: 1.6 !important;
+}
+
+section.card.sales-list-card .sales-invoice-list {
+  width: 100% !important;
+  display: grid !important;
+  gap: 12px !important;
+}
+
+section.card.sales-list-card .sales-invoice-item {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 190px 130px !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 16px !important;
+  border: 1px solid var(--line, #e5e7eb) !important;
+  border-radius: 18px !important;
+  background: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04) !important;
+}
+
+section.card.sales-list-card .sales-invoice-item:hover {
+  background: var(--brand-soft, #fff7ed) !important;
+  border-color: var(--brand-border, #fed7aa) !important;
+}
+
+section.card.sales-list-card .sales-invoice-info {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 5px !important;
+}
+
+section.card.sales-list-card .sales-invoice-info h3 {
+  margin: 0 !important;
+  color: var(--text, #111827) !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  line-height: 1.6 !important;
+}
+
+section.card.sales-list-card .sales-invoice-info p {
+  margin: 0 !important;
+  color: var(--muted, #64748b) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.7 !important;
+}
+
+section.card.sales-list-card .sales-invoice-total {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 5px !important;
+  justify-items: end !important;
+  text-align: left !important;
+  direction: rtl !important;
+}
+
+section.card.sales-list-card .sales-invoice-total strong {
+  color: var(--text, #111827) !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  line-height: 1.7 !important;
+  white-space: nowrap !important;
+}
+
+section.card.sales-list-card .sales-invoice-total small {
+  color: var(--muted, #64748b) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+
+section.card.sales-list-card .sales-print-btn,
+section.card.sales-list-card .sales-invoice-item > button {
+  width: 100% !important;
+  height: 42px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: var(--dark, #111827) !important;
+  color: #ffffff !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+}
+
+section.card.sales-list-card .sales-print-btn:hover,
+section.card.sales-list-card .sales-invoice-item > button:hover {
+  background: #0f172a !important;
+}
+
+section.card.sales-list-card .sales-empty-text {
+  margin: 0 !important;
+  padding: 16px !important;
+  border-radius: 16px !important;
+  background: var(--field, #f9fafb) !important;
+  color: var(--muted, #64748b) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
+
+@media (max-width: 768px) {
+  section.card.sales-list-card .sales-invoice-item {
+    grid-template-columns: 1fr !important;
+    align-items: stretch !important;
+  }
+
+  section.card.sales-list-card .sales-invoice-total {
+    justify-items: start !important;
+    text-align: right !important;
+  }
+
+  section.card.sales-list-card .sales-invoice-total strong {
+    white-space: normal !important;
+  }
+}
