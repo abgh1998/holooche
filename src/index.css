@@ -4681,3 +4681,339 @@ tbody tr:hover {
     width: 100%;
   }
 }
+/* =========================================================
+   Invoice / Receipt Card Complete Fix
+   فاکتور صندوق + QR + ته فاکتور
+========================================================= */
+
+.invoice-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  direction: rtl;
+  overflow: hidden;
+}
+
+.invoice-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line, #e5e7eb);
+}
+
+.invoice-header h2 {
+  margin: 0 0 6px;
+  color: var(--text, #111827);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.invoice-header p {
+  margin: 0;
+  color: var(--muted, #64748b);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.print-btn,
+.invoice-header .print-btn {
+  border: 0;
+  border-radius: var(--radius-sm, 14px);
+  background: var(--dark, #111827);
+  color: #ffffff;
+  padding: 11px 18px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.print-btn:hover,
+.invoice-header .print-btn:hover {
+  background: #0f172a;
+}
+
+.invoice-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.invoice-box {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: var(--radius-md, 18px);
+  background: var(--field, #f9fafb);
+  overflow: hidden;
+}
+
+.invoice-row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  padding: 15px 16px;
+  border-bottom: 1px dashed var(--line, #e5e7eb);
+}
+
+.invoice-row:last-child {
+  border-bottom: 0;
+}
+
+.invoice-row span {
+  color: var(--muted, #64748b);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.invoice-row strong {
+  color: var(--text, #111827);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.8;
+  word-break: break-word;
+}
+
+.total-row {
+  background: var(--brand-soft, #fff7ed);
+}
+
+.invoice-amount {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+}
+
+.invoice-amount strong {
+  color: var(--brand-dark, #c2410c);
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.7;
+}
+
+.invoice-amount small {
+  color: var(--muted, #64748b);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.8;
+}
+
+.invoice-qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 190px;
+  padding: 18px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: var(--radius-md, 18px);
+  background: #ffffff;
+  box-shadow: var(--shadow-soft, 0 10px 24px rgba(15, 23, 42, 0.04));
+}
+
+.invoice-qr-box img {
+  width: 150px;
+  height: 150px;
+  padding: 8px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid var(--line, #e5e7eb);
+  object-fit: contain;
+}
+
+.invoice-qr-box span {
+  color: var(--muted, #64748b);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+}
+
+/* Stub / ته فاکتور */
+.invoice-stub {
+  display: grid;
+  gap: 14px;
+  padding-top: 6px;
+}
+
+.stub-cut-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted, #64748b);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.stub-cut-line::before {
+  content: "";
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  right: 0;
+  border-top: 2px dashed var(--line, #e5e7eb);
+}
+
+.stub-cut-line span {
+  position: relative;
+  z-index: 1;
+  padding: 0 12px;
+  background: var(--card, #ffffff);
+}
+
+.stub-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px;
+  gap: 16px;
+  padding: 16px;
+  border: 1px dashed var(--line, #e5e7eb);
+  border-radius: var(--radius-md, 18px);
+  background: #ffffff;
+}
+
+.stub-info {
+  display: grid;
+  gap: 8px;
+}
+
+.stub-info h3 {
+  margin: 0 0 4px;
+  color: var(--text, #111827);
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.stub-info p {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  margin: 0;
+  padding-bottom: 7px;
+  border-bottom: 1px dashed var(--line, #e5e7eb);
+}
+
+.stub-info p:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.stub-info span {
+  color: var(--muted, #64748b);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.stub-info strong {
+  color: var(--text, #111827);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.stub-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 16px;
+  background: var(--field, #f9fafb);
+}
+
+.stub-qr img {
+  width: 90px;
+  height: 90px;
+  padding: 5px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid var(--line, #e5e7eb);
+  object-fit: contain;
+}
+
+.stub-qr span {
+  color: var(--muted, #64748b);
+  font-size: 11px;
+  font-weight: 900;
+  text-align: center;
+}
+
+/* Print mode */
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+
+  .main-menu,
+  .header,
+  .app-header,
+  .print-btn,
+  .transaction-form,
+  .transaction-list {
+    display: none !important;
+  }
+
+  .app,
+  .app-shell,
+  .app-content {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .invoice-card {
+    box-shadow: none !important;
+    border: 1px solid #111827 !important;
+    border-radius: 0 !important;
+    page-break-inside: avoid;
+  }
+
+  .invoice-main {
+    grid-template-columns: 1fr 170px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .invoice-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .print-btn,
+  .invoice-header .print-btn {
+    width: 100%;
+  }
+
+  .invoice-main {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .invoice-qr-box {
+    min-height: auto;
+  }
+
+  .stub-content {
+    grid-template-columns: 1fr;
+  }
+
+  .stub-info p {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
